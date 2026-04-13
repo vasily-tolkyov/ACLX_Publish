@@ -13,7 +13,7 @@
         "src/aclx/__init__.py": "23d916d96f034fabb44af13357252f4b7a5af8b70b305ba4a80ee4bb21e8ceea",
         "src/aclx/checkpoint_state.py": "fd7754aa6773707a5b04cc44f30bbac3b95c6e190550c76c7c8147beec82ac1e",
         "src/aclx/contract.py": "7a96ced2643058006f2f6738b823d13eeaa926df06ab10c104eb540c77f78fb8",
-        "src/aclx/contract_normalizer.py": "2e95d9911c3edc9fb05a633ba55764866c70acf03cf2ba91be8f5bfb1f04d154",
+        "src/aclx/contract_normalizer.py": "6890b9dd369c1c211a0a88600fa531843cf1b653a4cfa4b211eef4bfe72b2266",
         "src/aclx/contract_pipeline.py": "57e35a3b1ee4e1a3a57b9de682b5193e18e6fc5e2803b143c6e91dc0af9e0a22",
         "src/aclx/hybrid.py": "4de26ac90da94357a8b6a13d94dddbda4a3d31a782038bfae9b4ef3a8b37d411",
         "src/aclx/project_adapters/__init__.py": "218d157948a676ae5f71ab168e8ce90264c513f3fa0607536ec155f8fc642f15",

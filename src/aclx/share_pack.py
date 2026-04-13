@@ -445,7 +445,7 @@ def run_cli_help(isolated_home: str | Path, runtime_root: str | Path, venv_root:
     env["PATH"] = str(venv_scripts(venv_root)) + os.pathsep + env.get("PATH", "")
     command = resolve_aclx_command(venv_root)
     argv = [str(command), "--help"]
-    if command.suffix.lower() in {".cmd", ".bat"}:
+    if os.name == "nt" and command.suffix.lower() in {".cmd", ".bat"}:
         argv = ["cmd", "/c", str(command), "--help"]
     result = subprocess.run(
         argv,
@@ -490,11 +490,15 @@ def ensure_python_311_plus(python_executable: str) -> None:
 
 
 def venv_python(venv_root: str | Path) -> Path:
-    return Path(venv_root).resolve() / "Scripts" / "python.exe"
+    root = Path(venv_root).resolve()
+    if os.name == "nt":
+        return root / "Scripts" / "python.exe"
+    return root / "bin" / "python"
 
 
 def venv_scripts(venv_root: str | Path) -> Path:
-    return Path(venv_root).resolve() / "Scripts"
+    root = Path(venv_root).resolve()
+    return root / ("Scripts" if os.name == "nt" else "bin")
 
 
 def render_template(path: str | Path, values: dict[str, str]) -> str:

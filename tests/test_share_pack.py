@@ -99,12 +99,12 @@ class SharePackTests(unittest.TestCase):
             self.assertFalse((isolated_home / ".sandbox-bin").exists())
 
             agents_text = (isolated_home / "AGENTS.md").read_text(encoding="utf-8")
-            self.assertIn(str(runtime_root), agents_text)
+            self.assertIn(str(runtime_root.resolve()), agents_text)
             runtime_skill = (isolated_home / "skills" / "aclx-runtime" / "SKILL.md").read_text(encoding="utf-8")
-            self.assertIn(str(runtime_root), runtime_skill)
+            self.assertIn(str(runtime_root.resolve()), runtime_skill)
             launcher_text = (install_root / "start_hybrid_codex.ps1").read_text(encoding="utf-8")
             self.assertIn("$env:CODEX_HOME = $TargetHome", launcher_text)
-            self.assertIn(str(isolated_home), launcher_text)
+            self.assertIn(str(isolated_home.resolve()), launcher_text)
             self.assertEqual(result["source_home"], str(source_home.resolve()))
 
     def test_sync_share_pack_assets_copies_current_sources_and_regenerates_templates(self) -> None:
@@ -185,10 +185,15 @@ class SharePackTests(unittest.TestCase):
             (isolated_home / "auth.json").write_text("{}", encoding="utf-8")
             (isolated_home / "config.toml").write_text('model = "gpt-5.4"\n', encoding="utf-8")
 
-            scripts_dir = install_root / "runtime" / ".venv" / "Scripts"
+            scripts_dir = install_root / "runtime" / ".venv" / ("Scripts" if os.name == "nt" else "bin")
             scripts_dir.mkdir(parents=True, exist_ok=True)
-            aclx_cmd = scripts_dir / "aclx.cmd"
-            aclx_cmd.write_text("@echo off\r\necho ACL-X CLI\r\n", encoding="utf-8")
+            if os.name == "nt":
+                aclx_cmd = scripts_dir / "aclx.cmd"
+                aclx_cmd.write_text("@echo off\r\necho ACL-X CLI\r\n", encoding="utf-8")
+            else:
+                aclx_cmd = scripts_dir / "aclx"
+                aclx_cmd.write_text("#!/bin/sh\nprintf 'ACL-X CLI\\n'\n", encoding="utf-8")
+                aclx_cmd.chmod(0o755)
 
             result = verify_installed_share_pack(
                 install_root=install_root,
