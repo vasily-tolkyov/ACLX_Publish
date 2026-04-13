@@ -28,6 +28,15 @@ ACL-X 是一套面向 AI agent 的高密度通信语言与可见运行时边界�
 
 建议先读 [benchmark/summary.zh-CN.md](benchmark/summary.zh-CN.md)，再看最新中文公开报告 [benchmark/hybrid_general_task_public_report_zh_latest.md](benchmark/hybrid_general_task_public_report_zh_latest.md)。
 
+## 首发说明
+
+这是当前 ACL-X hybrid 策略的第一个正式公开发布版本。
+
+- 当前 release 口径仍然坚持质量优先：在已验证测试集上，输出质量不能下降。
+- 现阶段的主要优化目标仍然是耗时。
+- 后续版本会继续在当前版本基础上加强时间优化与 token 优化，尤其会继续提升除 `t1` 之外层级的 token 表现。
+- 欢迎大家提交使用反馈、失败样例和 benchmark 对比结果。
+
 ## 各层级适用场景
 
 | 层级 | 何时选择 | Bridge 模式 | 典型任务 |
@@ -118,6 +127,8 @@ ACL-X 是一套面向 AI agent 的高密度通信语言与可见运行时边界�
 - [docs/release_validation_latest.md](docs/release_validation_latest.md)：最新英文预发布重型报告
 - [docs/agent_compatibility.zh-CN.md](docs/agent_compatibility.zh-CN.md)：Agent 兼容性与默认安装边界说明
 - [docs/agent_compatibility.md](docs/agent_compatibility.md)：英文 Agent 兼容性说明
+- [docs/launch_announcement.zh-CN.md](docs/launch_announcement.zh-CN.md)：中文首发公告文案包
+- [docs/launch_announcement.md](docs/launch_announcement.md)：英文首发公告文案包
 - [STRATEGY.zh-CN.md](STRATEGY.zh-CN.md)：中文 tier 策略说明
 - [STRATEGY.md](STRATEGY.md)：英文 tier 策略说明
 - [RUNTIME_GUIDE.zh-CN.md](RUNTIME_GUIDE.zh-CN.md)：中文运行时挂接与升级规则

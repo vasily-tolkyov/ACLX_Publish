@@ -28,6 +28,15 @@ Latest heavy reports:
 
 Start with [benchmark/summary.md](benchmark/summary.md), then read the latest public report in [benchmark/hybrid_general_task_public_report_en_latest.md](benchmark/hybrid_general_task_public_report_en_latest.md).
 
+## Launch Note
+
+This is the first formal public release of the current ACL-X hybrid strategy.
+
+- The release message stays quality-first: output quality must not regress on the validated suites.
+- The main optimization target for the current version remains elapsed time.
+- Follow-up work will continue to strengthen both time optimization and token optimization on top of the current release, with extra attention to improving token behavior beyond the already strong `t1` wins.
+- Usage reports, failure cases, and benchmark comparisons are welcome through repository feedback channels.
+
 ## Which Tier To Use
 
 | Tier | When to choose it | Bridge mode | Typical task |
@@ -118,6 +127,8 @@ These figures are tier aggregates from two heavy suites, not a guarantee that ev
 - [docs/release_validation_latest.md](docs/release_validation_latest.md): canonical latest pre-release heavy report
 - [docs/agent_compatibility.md](docs/agent_compatibility.md): host-compatibility and default-installation boundary
 - [docs/agent_compatibility.zh-CN.md](docs/agent_compatibility.zh-CN.md): Chinese host-compatibility guide
+- [docs/launch_announcement.md](docs/launch_announcement.md): launch announcement copy pack
+- [docs/launch_announcement.zh-CN.md](docs/launch_announcement.zh-CN.md): Chinese launch announcement copy pack
 - [STRATEGY.md](STRATEGY.md): tier triggers, bundle caps, bridge modes, and override rules
 - [STRATEGY.zh-CN.md](STRATEGY.zh-CN.md): Chinese tier strategy
 - [RUNTIME_GUIDE.md](RUNTIME_GUIDE.md): runtime hookup and promotion rules
