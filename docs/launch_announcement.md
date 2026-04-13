@@ -2,11 +2,11 @@
 
 Chinese version: [launch_announcement.zh-CN.md](launch_announcement.zh-CN.md).
 
-This document collects ready-to-use copy for the first formal public release of the current ACL-X hybrid strategy.
+This document collects ready-to-use copy for the current formal public release of the ACL-X hybrid strategy.
 
 ## Core Message
 
-- This is the first formal public release of the current ACL-X hybrid strategy.
+- This is the current formal public release of the ACL-X hybrid strategy.
 - Release messaging is quality-first: validated output quality must stay flat or improve.
 - The main optimization target in the current version is elapsed time.
 - Token behavior is real but tier-dependent rather than universal.
@@ -29,7 +29,7 @@ This document collects ready-to-use copy for the first formal public release of 
 
 ## GitHub Release Blurb
 
-ACL-X v0.3.0 is the first formal public release of the current hybrid strategy.
+ACL-X v0.3.1 is the current formal public release of the hybrid strategy.
 
 This release packages the validated adaptive routing behavior, bilingual documentation, fresh heavy benchmark evidence, and the Codex-oriented share-pack installation path into a publishable public repository.
 
@@ -41,7 +41,7 @@ We will continue improving this version after launch, with ongoing work focused 
 
 ## Long Announcement
 
-We are publishing the first formal public release of the current ACL-X hybrid strategy.
+We are publishing the current formal public release of the ACL-X hybrid strategy as `v0.3.1`.
 
 This release turns the current hybrid routing and runtime behavior into a public repository with source-install support, heavy benchmark artifacts, bilingual release documentation, and a Codex-oriented share-pack for default-on installation on supported hosts.
 
@@ -61,10 +61,10 @@ After launch, we will continue strengthening the current version with more time 
 
 ## Short Announcement
 
-ACL-X v0.3.0 is now public.
+ACL-X v0.3.1 is now public.
 
-This is the first formal public release of the current hybrid strategy: quality-first, time-first, and backed by fresh heavy benchmarks plus bilingual docs. We will keep improving both time optimization and token optimization from here. Feedback and real-world test cases are welcome.
+This is the formal public release build of the current hybrid strategy: quality-first, time-first, and backed by fresh heavy benchmarks plus bilingual docs. We will keep improving both time optimization and token optimization from here. Feedback and real-world test cases are welcome.
 
 ## Very Short Social Post
 
-ACL-X v0.3.0 is live: first formal public release of the current hybrid strategy. Quality-first, time-first, token gains where validated, and more optimization work coming next. Feedback welcome.
+ACL-X v0.3.1 is live: formal public release build of the current hybrid strategy. Quality-first, time-first, token gains where validated, and more optimization work coming next. Feedback welcome.

@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.1 - 2026-04-13
+
+- Fixed the public release line after the initial `v0.3.0` tag exposed cross-platform GitHub Actions failures.
+- Normalized strategy-lock and contract-source handling so line-ending differences and Windows short paths no longer cause false drift or missing `TASK.md` contract loads.
+- Fixed share-pack verification across Windows and Unix launcher layouts.
+- Added regression coverage for cross-platform contract parsing and share-pack validation behavior.
+- Promoted the repaired formal public release as `v0.3.1`.
+
 ## v0.3.0 - 2026-04-13
 
 - Formal first public GitHub release for the current ACL-X hybrid strategy.
