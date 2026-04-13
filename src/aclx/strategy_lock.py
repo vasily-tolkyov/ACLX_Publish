@@ -64,4 +64,16 @@ def _repo_root() -> Path:
 def _file_sha256(path: Path) -> str:
     if not path.exists():
         return ""
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(_stable_hash_bytes(path.read_bytes())).hexdigest()
+
+
+def _stable_hash_bytes(data: bytes) -> bytes:
+    try:
+        text = data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return data
+    return _normalize_text_for_hash(text).encode("utf-8")
+
+
+def _normalize_text_for_hash(text: str) -> str:
+    return text.replace("\r\n", "\n").replace("\r", "\n")

@@ -44,6 +44,25 @@ class ReleaseValidationABTests(unittest.TestCase):
         self.assertIn("tests.test_contract", command)
         self.assertIn("tests.test_formal_heavy_matrix", command)
 
+    def test_verify_strategy_lock_normalizes_utf8_line_endings_and_bom(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "configs").mkdir(parents=True)
+            target = root / "alpha.txt"
+            target.write_bytes(b"alpha\nbeta\n")
+            (root / "configs" / "strategy_lock.json").write_text(
+                '{\n'
+                '  "lock_name": "test-lock",\n'
+                '  "files": {\n'
+                f'    "alpha.txt": "{release_validation_ab._sha256(target)}"\n'
+                "  }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            target.write_bytes(b"\xef\xbb\xbfalpha\r\nbeta\r\n")
+            with patch.object(release_validation_ab, "REPO_ROOT", root):
+                self.assertEqual(release_validation_ab.verify_strategy_lock(), [])
+
 
 if __name__ == "__main__":
     unittest.main()
