@@ -1,0 +1,33 @@
+tiers:
+  t3:
+    label: loop-heavy
+    nl_ratio: 0.2
+    aclx_ratio: 0.75
+    bridge_mode: session
+    reasoning_effort: "medium"
+    doc_loop_reasoning_effort: "low"
+    doc_loop_low_reasoning_max_choice_lines: 10
+    doc_loop_low_task_contract_max_lines: 18
+    doc_loop_low_task_contract_max_chars: 1200
+    use_aclx: true
+    emit_machine_hint: false
+    support_label: "Machine contract:"
+    include_constraints: true
+    include_next_hint: true
+    include_avoid_hint: true
+    max_items: 3
+    max_state_items: 1
+    max_evidence_items: 1
+    max_risk_items: 1
+    max_next_actions: 0
+    include_completed: true
+    include_cwd: false
+    include_transport_meta: false
+    include_profile_state: false
+    include_task_ref_state: false
+    preserve_task_contract: true
+    task_contract_max_lines: 14
+    task_contract_max_chars: 900
+    whole_line_only: true
+    doc_loop_low_task_contract_max_lines: 6
+    doc_loop_low_task_contract_max_chars: 600

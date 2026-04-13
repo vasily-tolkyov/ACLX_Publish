@@ -1,0 +1,3 @@
+display_name: "ACL-X Protocol"
+short_description: "ACL-X only for reusable machine artifacts"
+default_prompt: "Use ACL-X only for real reusable machine-only transport."

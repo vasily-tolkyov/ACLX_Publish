@@ -1,0 +1,5 @@
+Release validation facts
+- strategy lock protects AGENTS.md, configs/hybrid_router_map.yaml, src/aclx/hybrid.py, and src/aclx/supervisor.py
+- default runtime style is adaptive
+- single-surface work stays in t0
+- t0 should not load ACL-X runtime bundles

@@ -1,0 +1,7 @@
+interface:
+  display_name: "ACL-X Runtime"
+  short_description: "Explicit ACL-X runtime for real machine state"
+  default_prompt: "Use $aclx-runtime only when the current run actually starts a handoff, shared package, resume bundle, or other reusable machine-only state. If the prompt already contains the runtime contract and ACL-X bundle, use that directly, avoid rereading runtime docs or local ACL-X examples unless blocked, skip plan narration for contract-complete t2/t3 runs, and for contract-complete t3 write the provided bundle directly as the checkpoint artifact unless the contract explicitly requires a new checkpoint state."
+
+policy:
+  allow_implicit_invocation: true

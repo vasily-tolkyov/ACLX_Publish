@@ -1,0 +1,31 @@
+include AGENTS.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+include CONTRIBUTING.zh-CN.md
+include LICENSE
+include README.md
+include README.zh-CN.md
+include RELEASE_CHECKLIST.md
+include RELEASE_CHECKLIST.zh-CN.md
+include RUNTIME_GUIDE.md
+include RUNTIME_GUIDE.zh-CN.md
+include SECURITY.md
+include STRATEGY.md
+include STRATEGY.zh-CN.md
+prune .aclx_runtime
+prune artifacts
+prune build
+prune dist
+prune output
+prune tmp
+prune tests/formal/runs
+prune src/acl_x.egg-info
+recursive-include benchmark *
+recursive-include configs *
+recursive-include ctx *
+recursive-include docs *
+recursive-include examples *
+recursive-include share_pack *
+recursive-include tests *
+global-exclude __pycache__
+global-exclude *.py[cod]

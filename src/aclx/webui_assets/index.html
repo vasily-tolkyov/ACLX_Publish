@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ACL-X 会话界面</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-title">会话</div>
+          <button id="newThreadButton" class="new-thread-button" type="button">添加新线程</button>
+        </div>
+        <div id="workspaceList" class="workspace-list"></div>
+        <div class="sidebar-bottom">
+          <button id="archivedThreadsButton" class="sidebar-secondary-button" type="button">查看归档</button>
+        </div>
+      </aside>
+
+      <main class="chat-shell">
+        <div class="chat-actions">
+          <button id="archiveThreadButton" class="chat-action-button" type="button" disabled>归档当前线程</button>
+        </div>
+        <div id="conversation" class="conversation empty">
+          <div class="empty-state">
+            <div class="empty-title">请选择一个线程</div>
+            <div class="empty-text">左侧只显示当前活跃线程。也可以点击“添加新线程”创建一个新的会话草稿。</div>
+          </div>
+        </div>
+
+        <form id="composer" class="composer">
+          <textarea id="messageInput" rows="3" placeholder="输入消息，按 Enter 发送，Shift + Enter 换行"></textarea>
+          <div class="composer-actions">
+            <div id="composerStatus" class="composer-status">准备就绪</div>
+            <button id="sendButton" class="send-button" type="submit">发送</button>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <div id="workspaceModal" class="modal hidden">
+      <div class="modal-backdrop" data-close-modal="1"></div>
+      <div class="modal-panel">
+        <div class="modal-head">
+          <div class="modal-title">添加新线程</div>
+          <button id="closeModalButton" class="modal-close" type="button">关闭</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-label">从当前工作区中选择</div>
+          <div id="workspaceCandidates" class="candidate-list"></div>
+          <div class="modal-label">或手动输入绝对路径</div>
+          <input id="workspacePathInput" class="workspace-input" type="text" placeholder="例如：D:\项目\workspace">
+          <div id="workspaceError" class="modal-error"></div>
+        </div>
+        <div class="modal-foot">
+          <button id="cancelModalButton" class="secondary-button" type="button">取消</button>
+          <button id="confirmWorkspaceButton" class="primary-button" type="button">创建线程</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="archiveModal" class="modal hidden">
+      <div class="modal-backdrop" data-close-archive-modal="1"></div>
+      <div class="modal-panel archive-modal-panel">
+        <div class="modal-head">
+          <div class="modal-title">最近归档</div>
+          <button id="closeArchiveModalButton" class="modal-close" type="button">关闭</button>
+        </div>
+        <div class="modal-body archive-modal-body">
+          <div id="archivedList" class="archived-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

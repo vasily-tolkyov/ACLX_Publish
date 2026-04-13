@@ -1,0 +1,28 @@
+rules:
+  H0: "ACLX machine-state; NL final."
+  H1: "Stack-first, smallest useful set."
+  H2: "Single lane; no overlap."
+  H3: "Cache-first; avoid rereads."
+  H4: "Minimal commands only."
+  H5: "Verify risky claims before handoff."
+  H6: "Stop on missing facts or scope drift."
+profiles:
+  default: ["H0", "H1", "H2", "H3", "H6"]
+  inspect: ["H0", "H2", "H3", "H6"]
+  implement: ["H0", "H1", "H2", "H3", "H4", "H5", "H6"]
+  review: ["H0", "H1", "H2", "H3", "H5", "H6"]
+  benchmark: ["H0", "H2", "H3", "H4", "H5", "H6"]
+  debug: ["H0", "H1", "H2", "H3", "H4", "H5", "H6"]
+  research: ["H0", "H1", "H2", "H3", "H6"]
+max_items_per_list: 4
+task_shapes:
+  single_surface: t0
+  delegated_once: t1
+  shared_state: t2
+  multi_step: t2
+  loop: t3
+tier_files:
+  t0: tier_strategies/t0.yaml
+  t1: tier_strategies/t1.yaml
+  t2: tier_strategies/t2.yaml
+  t3: tier_strategies/t3.yaml

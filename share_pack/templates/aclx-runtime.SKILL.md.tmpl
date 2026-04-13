@@ -1,0 +1,19 @@
+---
+name: aclx-runtime
+description: Use only when the current run must emit or consume reusable ACL-X machine-only state. Skip it for one-shot work and for tasks that only describe, port, document, or configure hybrid or ACL-X behavior.
+---
+
+# ACL-X Runtime
+
+Use this skill only after the current run actually needs reusable ACL-X machine state from `{{RUNTIME_ROOT}}`.
+
+- `t0`: stay in natural language.
+- `t1`: one real handoff or shared package -> tiny ACL-X `C-layer` bundle.
+- `t2`: reusable machine state -> runtime bridge prompt with `Machine contract`, required artifacts, and acceptance invariants.
+- `t3`: repeated loop or resume -> runtime bridge prompt with loop invariants, checkpoint artifacts, and ACL-X resume handles.
+
+Once a run reaches `t2` or `t3`, do not replace machine state with free-text notes. Keep shared artifacts and checkpoint/resume prompts on the runtime bridge.
+If the prompt already includes `Machine contract` or `Loop invariants` plus an ACL-X bundle, treat that prompt as sufficient runtime contract and skip rereading ACL-X docs/examples unless blocked.
+If a contract-complete `t2` prompt already names the artifact and acceptance checks, do not reread `fixture.json`, `AGENTS.md`, this skill file, or hidden machine-only runtime files unless a required fact is missing.
+If a contract-complete `t3` prompt already names the checkpoint and includes an ACL-X bundle, do not reread `fixture.json`, hidden machine-only runtime files, `AGENTS.md`, this skill file, or general skill-creation docs unless a required fact is missing.
+For contract-complete `t2/t3` runs, skip plan narration and go straight to edit, verify, and finish unless blocked.

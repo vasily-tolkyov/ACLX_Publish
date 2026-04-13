@@ -1,0 +1,19 @@
+# Local ACL-X Runtime
+
+Use an adaptive ACL-X runtime installed at `{{RUNTIME_ROOT}}`.
+
+Default behavior:
+
+- route subagent selection through `codex-subagent-router`
+- `T0 nl-lean`: one-shot, non-loop, no real handoff; stay in natural language
+- `T1 handoff-lite`: first machine-only handoff or shared package; use compact ACL-X `C-layer` only there
+- `T2 balanced`: repeated handoffs or reusable machine state; use compact ACL-X plus the runtime bridge
+- `T3 loop-heavy`: verification loops or many handoffs; use `{{SESSION_PATH}}`, snapshots, checkpoints, archive, and resume bridge prompts
+- summarize shell and file reads through `{{TOOL_SUMMARY_PATH}}`
+- generate and honor hidden machine-only runtime files under `.aclx_runtime/` only when the selected tier needs them
+- once a run promotes to `t2` or `t3`, machine-state, shared artifacts, and checkpoint/resume prompts must go through `aclx-runtime`; do not replace them with free-text notes
+- if a `t2/t3` prompt already carries `Machine contract` or `Loop invariants` plus an ACL-X bundle, treat that prompt as the runtime contract and avoid reopening extra ACL-X/runtime docs unless blocked
+- if a contract-complete `t2` prompt already names the artifact and acceptance checks, do not reread `fixture.json`, `AGENTS.md`, CODEX_HOME skill docs, or hidden machine-only runtime files unless a required fact is missing
+- if a contract-complete `t3` prompt already names the checkpoint and includes an ACL-X bundle, do not reread `fixture.json`, hidden machine-only runtime files, `AGENTS.md`, CODEX_HOME skill docs, or general skill-creation docs unless a required fact is missing
+- for contract-complete `t2/t3` runs, skip plan narration and move straight to edit -> verify -> finish unless blocked
+- avoid anthropic-specific dependencies or assumptions

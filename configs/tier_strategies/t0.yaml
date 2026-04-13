@@ -1,0 +1,18 @@
+tiers:
+  t0:
+    label: nl-lean
+    nl_ratio: 1.0
+    aclx_ratio: 0.0
+    bridge_mode: none
+    reasoning_effort: "medium"
+    guard_mode: selective
+    max_guard_lines: 1
+    generic_reasoning_effort: "low"
+    exact_output_reasoning_effort: "low"
+    use_aclx: false
+    max_items: 0
+    max_state_items: 0
+    max_evidence_items: 0
+    max_risk_items: 0
+    max_next_actions: 0
+    include_completed: false

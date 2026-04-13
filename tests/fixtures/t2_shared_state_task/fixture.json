@@ -1,0 +1,25 @@
+{
+  "tier": "t2",
+  "title": "Shared-state repair",
+  "description": "Fix a small workflow bug and emit the shared-state ACL-X artifact plus review notes.",
+  "validator": "t2",
+  "task": "You are in an isolated workspace. Only edit files under {workspace}.\n\nRead {workspace}\\TASK.md.\nFix src/shared_pipeline.py so `python -m unittest discover -s tests -q` passes.\nWrite `runtime/shared_state.aclx` as an ACL-X C-layer shared-state artifact.\nWrite `reports/review_notes.md` with `Risk` and `Evidence` headings.\nKeep the final reply concise and list changed file paths.\n",
+  "profile": "implement",
+  "outputs": [
+    "runtime/shared_state.aclx",
+    "reports/review_notes.md"
+  ],
+  "constraints": [
+    "python -m unittest discover -s tests -q passes",
+    "runtime/shared_state.aclx uses ACL-X C-layer text",
+    "reports/review_notes.md keeps Risk and Evidence headings"
+  ],
+  "stop_conditions": [
+    "missing shared artifact",
+    "tests failing"
+  ],
+  "next_actions": [
+    "write shared state",
+    "run tests"
+  ]
+}

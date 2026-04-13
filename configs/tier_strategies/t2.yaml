@@ -1,0 +1,27 @@
+tiers:
+  t2:
+    label: balanced
+    nl_ratio: 0.34
+    aclx_ratio: 0.66
+    bridge_mode: session
+    reasoning_effort: "low"
+    preserve_task_contract: true
+    task_contract_max_lines: 2
+    task_contract_max_chars: 180
+    whole_line_only: true
+    use_aclx: true
+    emit_machine_hint: false
+    support_label: "Machine contract:"
+    include_constraints: true
+    include_next_hint: true
+    include_avoid_hint: true
+    max_items: 2
+    max_state_items: 1
+    max_evidence_items: 1
+    max_risk_items: 0
+    max_next_actions: 0
+    include_completed: false
+    include_cwd: false
+    include_transport_meta: false
+    include_profile_state: false
+    include_task_ref_state: false

@@ -1,0 +1,23 @@
+tiers:
+  t1:
+    label: handoff-lite
+    nl_ratio: 0.18
+    aclx_ratio: 0.82
+    bridge_mode: bundle
+    reasoning_effort: "low"
+    use_aclx: true
+    emit_machine_hint: false
+    support_label: "Single handoff contract:"
+    include_constraints: true
+    include_next_hint: true
+    include_avoid_hint: false
+    max_items: 1
+    max_state_items: 0
+    max_evidence_items: 2
+    max_risk_items: 1
+    max_next_actions: 2
+    include_completed: false
+    include_cwd: false
+    include_transport_meta: false
+    include_profile_state: true
+    include_task_ref_state: false

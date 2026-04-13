@@ -1,0 +1,29 @@
+{
+  "tier": "t3",
+  "title": "Loop skill repair",
+  "description": "Rewrite a skill stub so it preserves the required loop invariants and emits a checkpoint artifact.",
+  "validator": "t3",
+  "task": "You are in an isolated workspace. Only edit files under {workspace}.\n\nRead {workspace}\\TASK.md.\nRewrite `target_skill/SKILL.md` so it satisfies the required loop constraints.\nWrite `runtime/checkpoints/checkpoint_01.aclx` as an ACL-X C-layer checkpoint artifact.\nKeep the final reply concise and list changed file paths.\n",
+  "profile": "review",
+  "outputs": [
+    "runtime/checkpoints/checkpoint_01.aclx",
+    "target_skill/SKILL.md"
+  ],
+  "constraints": [
+    "generator critic refiner roles remain explicit",
+    "the skill says intake-only",
+    "the critic gives the final outward verdict",
+    "strict mode wording remains explicit",
+    "the skill says do not use for new tasks",
+    "the skill says must not count passes or failures",
+    "the skill says must not rewrite user requests"
+  ],
+  "stop_conditions": [
+    "scope drift",
+    "missing checkpoint artifact"
+  ],
+  "next_actions": [
+    "rewrite skill",
+    "persist checkpoint"
+  ]
+}

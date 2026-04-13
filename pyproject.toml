@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "acl-x"
+version = "0.3.0"
+description = "ACL-X: a high-density communication language and visible runtime for AI agents"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "OpenAI Codex" }]
+license = { file = "LICENSE" }
+keywords = ["aclx", "ai-agents", "runtime", "prompt-routing", "handoff"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+formal = [
+  "reportlab>=4.0",
+]
+reports = [
+  "reportlab>=4.0",
+  "PyMuPDF>=1.24",
+]
+dev = [
+  "reportlab>=4.0",
+  "PyMuPDF>=1.24",
+]
+
+[project.scripts]
+aclx = "aclx.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+aclx = ["webui_assets/*.html", "webui_assets/*.css", "webui_assets/*.js"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["tests/fixtures"]

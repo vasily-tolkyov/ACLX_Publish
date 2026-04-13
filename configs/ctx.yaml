@@ -1,0 +1,59 @@
+hard_token_limit: 8000
+layer0_budget: 600
+layer1_budget: 2500
+layer2_budget: 800
+tool_summary_ratio_target: 5.0
+tool_summary_keep: 3
+snapshot_dir: .aclx_runtime/snapshots
+checkpoint_dir: .aclx_runtime/checkpoints
+policy_file: .aclx_runtime/policy_active.aclx
+tiers:
+  t0:
+    emit_header: false
+    include_archive: false
+    write_checkpoint: false
+    write_policy: false
+    use_aclx: false
+    tool_summary_keep: 0
+  t1:
+    emit_header: false
+    include_archive: false
+    write_checkpoint: false
+    write_policy: false
+    use_aclx: true
+    tool_summary_keep: 0
+  t2:
+    emit_header: true
+    include_archive: false
+    write_checkpoint: false
+    write_policy: true
+    use_aclx: true
+    tool_summary_keep: 1
+    read_hint_keep: 2
+    validator_plan_keep: 2
+    emit_artifact_manifest: false
+    emit_validated_results: false
+    persist_generic_validator_results: false
+  t3:
+    emit_header: true
+    emit_header_on_resume: false
+    include_archive: true
+    include_archive_on_resume: false
+    compact_resume: true
+    resume_from_checkpoint: true
+    write_checkpoint: true
+    write_checkpoint_on_resume: false
+    write_policy: true
+    write_policy_on_resume: false
+    use_aclx: true
+    tool_summary_keep: 2
+    archive_keep: 2
+    layer0_budget: 500
+    layer1_budget: 2200
+    layer2_budget: 500
+    read_hint_keep: 2
+    validator_plan_keep: 2
+    literal_rule_keep: 1
+    emit_artifact_manifest: false
+    emit_validated_results: false
+    persist_generic_validator_results: false

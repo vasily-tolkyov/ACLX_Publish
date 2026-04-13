@@ -1,0 +1,24 @@
+# ACL-X Hybrid Share Pack Installation Task
+
+You are working from an extracted ACL-X hybrid share pack on Windows.
+
+Requirements:
+
+- Native Codex is already installed on this machine.
+- Python 3.11 or newer is available in `PATH`.
+- Do not inspect any external repository. Use only this extracted pack.
+- This pack installs a Codex-default runtime path. It does not automatically make non-Codex agent hosts use ACL-X hybrid by default.
+
+Contract:
+
+1. Read only files inside this extracted pack.
+2. Run `.\install.ps1`.
+3. Run `.\verify.ps1`.
+4. Return:
+   - the installed launcher path
+   - whether verification passed
+   - the verification summary JSON
+
+Do not modify the machine's original `~/.codex` in place. This pack installs into an isolated home under `%USERPROFILE%\.aclx-hybrid-share\current`.
+
+Pack version: `{{PACK_VERSION}}`

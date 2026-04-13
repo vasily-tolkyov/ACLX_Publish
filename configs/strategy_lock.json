@@ -1,0 +1,29 @@
+{
+    "lock_name":  "aclx-strategy-freeze-2026-04-13-t3-shell-trimmed",
+    "mode":  "hard",
+    "files":  {
+                  "AGENTS.md":  "6f9f297d319238cf851f697c22b2296a889692a0e3cb2329cdf4ddafe80e8ea4",
+                  "configs/ctx.yaml":  "51de057b9fc319ceabdd1087ca96f346f0379f5450745abf47dbb45ea6f81c94",
+                  "configs/hybrid_router_map.yaml":  "122f8982a9b7dc0571a2e789d9a2289b667ebfaf88fde7275c567a3b83615439",
+                  "configs/tier_strategies/t0.yaml":  "1b016a09a5894fdf535f1e0beb935592aa9faba7d0c5c4b5191214b2137eaab4",
+                  "configs/tier_strategies/t1.yaml":  "3b079ed3915d3a3aca4ca3d5e698685edea9a49649ee2dd987a08a8d4e8f8ebf",
+                  "configs/tier_strategies/t2.yaml":  "09d141ee0ca61359f26a8f813c3d8ff87f8133554b1e345ba41847f7ebf89e5d",
+                  "configs/tier_strategies/t3.yaml":  "9d52bf04a841e2929114d3332e337b2550ff829b7229e67b3137d391f29b5647",
+                  "ctx/session.py":  "daddd2e43dd5edd589c2f1d38a99440c2bf890ddf70766f92a2a65885b6cc79d",
+                  "src/aclx/checkpoint_state.py":  "fd7754aa6773707a5b04cc44f30bbac3b95c6e190550c76c7c8147beec82ac1e",
+                  "src/aclx/contract.py":  "7a96ced2643058006f2f6738b823d13eeaa926df06ab10c104eb540c77f78fb8",
+                  "src/aclx/contract_normalizer.py":  "2e95d9911c3edc9fb05a633ba55764866c70acf03cf2ba91be8f5bfb1f04d154",
+                  "src/aclx/contract_pipeline.py":  "57e35a3b1ee4e1a3a57b9de682b5193e18e6fc5e2803b143c6e91dc0af9e0a22",
+                  "src/aclx/__init__.py":  "23d916d96f034fabb44af13357252f4b7a5af8b70b305ba4a80ee4bb21e8ceea",
+                  "src/aclx/hybrid.py":  "a85f8a89bc09bce61e4862db932490e2f8b52d69722bbcf00b25ccfb1a8fe2e7",
+                  "src/aclx/project_adapters/__init__.py":  "218d157948a676ae5f71ab168e8ce90264c513f3fa0607536ec155f8fc642f15",
+                  "src/aclx/project_adapters/base.py":  "d9882c374a5ffd69f31010f5a1216bba1461b5807b8b5e6b6709101f45712801",
+                  "src/aclx/project_adapters/docs_adapter.py":  "624bcf2b87f4d1b3e8042199af7341d10d6b32bb0bb303880e9f222d51fa9386",
+                  "src/aclx/project_adapters/generic_fs.py":  "82822c816a79584c0b1e69afd84bb56bc1090feb3bfe4b1d37dfef3fcad16cde",
+                  "src/aclx/project_adapters/python_adapter.py":  "9e83431a2c8cc29a60308b7d890147a220db6839ceb8499f598fd632c068121e",
+                  "src/aclx/project_adapters/repo_custom.py":  "7fd832b88efbd18056740b8d6849899894445ba73047276c60bee8da56c5cd14",
+                  "src/aclx/strategy_lock.py":  "55c5f7ec6023c19de7fc1e0d22f6c47cee00d4c382aa260fd841567f4d1f1795",
+                  "src/aclx/supervisor.py":  "4b965a4f342ba059a3b98b4da0b7dfd869af081e74274b2bdbb07187a81cfd3f",
+                  "src/aclx/tier_projector.py":  "8c9860ce793c7ae9fcdcbaa3115071e9bbef31230bf6c786eafe5f4c7b22897e"
+              }
+}

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Subagent Router"
+  short_description: "Route work to one or many curated local Codex subagents by task type, stack, phase, and risk boundary."
+  default_prompt: "Use $codex-subagent-router to choose one or many local Codex subagents from my curated set, adapt the agent count to the actual task, and prefer Python, PowerShell, frontend framework specialists, backend or fullstack, review, debugging, DevOps, and AI or research agents."
+
+policy:
+  allow_implicit_invocation: true
