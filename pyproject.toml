@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "acl-x"
-version = "0.3.1"
+version = "0.3.2"
 description = "ACL-X: a high-density communication language and visible runtime for AI agents"
 readme = "README.md"
 requires-python = ">=3.11"

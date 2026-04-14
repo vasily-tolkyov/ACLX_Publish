@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.2 - 2026-04-14
+
+- Aligned the formal release line with the current `main` branch state.
+- Carried forward the post-release Chinese launch-copy wording sync into the formal public release version.
+- Promoted the aligned public release as `v0.3.2`.
+
 ## v0.3.1 - 2026-04-13
 
 - Fixed the public release line after the initial `v0.3.0` tag exposed cross-platform GitHub Actions failures.

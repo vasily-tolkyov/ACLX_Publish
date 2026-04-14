@@ -29,7 +29,7 @@ This document collects ready-to-use copy for the current formal public release o
 
 ## GitHub Release Blurb
 
-ACL-X v0.3.1 is the current formal public release of the hybrid strategy.
+ACL-X v0.3.2 is the current formal public release of the hybrid strategy.
 
 This release packages the validated adaptive routing behavior, bilingual documentation, fresh heavy benchmark evidence, and the Codex-oriented share-pack installation path into a publishable public repository.
 
@@ -41,7 +41,7 @@ We will continue improving this version after launch, with ongoing work focused 
 
 ## Long Announcement
 
-We are publishing the current formal public release of the ACL-X hybrid strategy as `v0.3.1`.
+We are publishing the current formal public release of the ACL-X hybrid strategy as `v0.3.2`.
 
 This release turns the current hybrid routing and runtime behavior into a public repository with source-install support, heavy benchmark artifacts, bilingual release documentation, and a Codex-oriented share-pack for default-on installation on supported hosts.
 
@@ -61,10 +61,10 @@ After launch, we will continue strengthening the current version with more time 
 
 ## Short Announcement
 
-ACL-X v0.3.1 is now public.
+ACL-X v0.3.2 is now public.
 
 This is the formal public release build of the current hybrid strategy: quality-first, time-first, and backed by fresh heavy benchmarks plus bilingual docs. We will keep improving both time optimization and token optimization from here. Feedback and real-world test cases are welcome.
 
 ## Very Short Social Post
 
-ACL-X v0.3.1 is live: formal public release build of the current hybrid strategy. Quality-first, time-first, token gains where validated, and more optimization work coming next. Feedback welcome.
+ACL-X v0.3.2 is live: formal public release build of the current hybrid strategy. Quality-first, time-first, token gains where validated, and more optimization work coming next. Feedback welcome.
