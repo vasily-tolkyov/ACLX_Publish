@@ -23,18 +23,18 @@ ACL-X 是一套面向 AI agent 的高密度通信语言与可见运行时边界�
 
 最新两次重型测试：
 
-- 通用任务重型 `20260413_160451`：聚合 token 优化 `46.87%`，聚合时间优化 `65.31%`，质量差值 `+0.75`
+- 通用任务重型 `20260415_110636_t2_refresh`：聚合 token 优化 `31.78%`，聚合时间优化 `54.12%`，质量差值 `+0.75`
 - 预发布重型 `20260413_152717`：聚合 token 优化 `66.35%`，聚合时间优化 `71.16%`，质量差值 `+5.00`
 
 建议先读 [benchmark/summary.zh-CN.md](benchmark/summary.zh-CN.md)，再看最新中文公开报告 [benchmark/hybrid_general_task_public_report_zh_latest.md](benchmark/hybrid_general_task_public_report_zh_latest.md)。
 
-## 首发说明
+## 更新说明
 
-这是当前 ACL-X hybrid 策略的第一个正式公开发布版本。
+这是当前 ACL-X hybrid 策略的正式公开更新版本。
 
 - 当前 release 口径仍然坚持质量优先：在已验证测试集上，输出质量不能下降。
 - 现阶段的主要优化目标仍然是耗时。
-- 后续版本会继续在当前版本基础上加强时间优化与 token 优化，尤其会继续提升除 `t1` 之外层级的 token 表现。
+- 后续版本会继续在当前版本基础上加强时间优化与 token 优化，尤其会继续提升 `t3` 的 token 表现并保持当前更强的 `t2` 收益。
 - 欢迎大家提交使用反馈、失败样例和 benchmark 对比结果。
 
 ## 各层级适用场景
@@ -91,7 +91,7 @@ ACL-X 是一套面向 AI agent 的高密度通信语言与可见运行时边界�
 | 套件 | Run ID | Tokens | Time | Quality | 建议这样理解 |
 | --- | --- | ---: | ---: | ---: | --- |
 | 预发布重型 | `20260413_152717` | `+66.35%` | `+71.16%` | `+5.00` | 带显式工件契约的有边界本地工程任务 |
-| 通用任务重型 | `20260413_160451` | `+46.87%` | `+65.31%` | `+0.75` | 带验证器和明确闭环条件的通用结构化任务 |
+| 通用任务重型 | `20260415_110636_t2_refresh` | `+31.78%` | `+54.12%` | `+0.75` | 带验证器和明确闭环条件的通用结构化任务 |
 
 ## 优化优先级
 
@@ -99,14 +99,14 @@ ACL-X 是一套面向 AI agent 的高密度通信语言与可见运行时边界�
 - 主要优化目标是耗时，而不是 token。
 - token 表现按 tier 分化，应当引用下面两次重型测试的结果，而不是宣传成普遍性的 token 优化。
 
-| 层级 | 路由类型 | 推荐表述 | 预发布重型 `20260413_152717` | 通用任务重型 `20260413_160451` |
+| 层级 | 路由类型 | 推荐表述 | 预发布重型 `20260413_152717` | 通用任务重型 `20260415_110636_t2_refresh` |
 | --- | --- | --- | --- | --- |
-| `t0` | 无真实 handoff、无共享机器状态、无循环的单表面任务 | 这是精确性优先层。耗时可以改善，但在微小固定格式任务上，token 更倾向于退化。 | token `-46.73%`，time `+31.89%`，quality `+5.00` | token `-12.11%`，time `+29.62%`，quality `+0.00` |
-| `t1` | 恰好一次真实 handoff 或一次子代理审查 | 这是当前证据里最明确的 token 和时间双重优化层，聚合 token 优化幅度最大。 | token `+76.08%`，time `+79.52%`，quality `+0.00` | token `+68.59%`，time `+72.69%`，quality `+0.00` |
-| `t2` | 带可复用机器状态、工件契约或 2+ handoff 的多步本地修复任务 | 这是时间优先、质量优先于 token 的层级。token 是否改善依赖任务形态，不应承诺每个任务都会降 token。 | token `+74.37%`，time `+70.96%`，quality `+15.00` | token `+3.43%`，time `+47.28%`，quality `+0.00` |
-| `t3` | 带 checkpoint、resume、replay 或 repeated verification 的循环型任务 | 这也是时间优先、质量优先于 token 的层级。聚合 token 往往只有小到中等改善，单任务也可能回退。 | token `+25.48%`，time `+58.51%`，quality `+0.00` | token `+10.84%`，time `+59.11%`，quality `+3.00` |
+| `t0` | 无真实 handoff、无共享机器状态、无循环的单表面任务 | 这是精确性优先层。聚合收益可能存在，但在极小固定格式任务上仍然对噪声敏感。 | token `-46.73%`，time `+31.89%`，quality `+5.00` | token `+7.21%`，time `+3.38%`，quality `+0.00` |
+| `t1` | 恰好一次真实 handoff 或一次子代理审查 | 这是当前公开证据里最稳定的低风险 token 与时间双重优化层。 | token `+76.08%`，time `+79.52%`，quality `+0.00` | token `+40.79%`，time `+66.79%`，quality `+0.00` |
+| `t2` | 带可复用机器状态、工件契约或 2+ handoff 的多步本地修复任务 | 当显式工件契约和验证器存在时，这一层已经可以支撑更强的公开效率表述。时间仍是主目标，但新的公开通用任务结果里 token 也有较强收益。 | token `+74.37%`，time `+70.96%`，quality `+15.00` | token `+48.26%`，time `+61.36%`，quality `+0.00` |
+| `t3` | 带 checkpoint、resume、replay 或 repeated verification 的循环型任务 | 这是时间优先、质量优先于 token 的层级。聚合 token 收益仍小于 `t1` 和当前刷新后的 `t2`。 | token `+25.48%`，time `+58.51%`，quality `+0.00` | token `+7.84%`，time `+39.15%`，quality `+3.00` |
 
-这些数字是两轮重型测试的 tier 聚合结果，不代表该 tier 下每个任务都会呈现同样的 token 方向。当前只有 `t1` 支持“重复出现的大幅 token 优化”这一稳定对外口径；`t2/t3` 更适合表述为“时间优先，token 可能改善但不承诺”；`t0` 更适合表述为“精确性优先，而非 token 优先”。
+这些数字是两轮重型测试的 tier 聚合结果，不代表该 tier 下每个任务都会呈现同样的 token 方向。当前 `t1` 仍是最稳定的低风险双重优化层；刷新后的 `t2` 现在也可以支撑更强的公开效率表述；`t3` 更适合表述为“时间优先，token 收益较小”；`t0` 更适合表述为“精确性优先，而非 token 优先”。
 
 ## 已知限制
 
@@ -123,12 +123,14 @@ ACL-X 是一套面向 AI agent 的高密度通信语言与可见运行时边界�
 - [benchmark/summary.md](benchmark/summary.md)：最新英文 benchmark 总览
 - [benchmark/hybrid_general_task_public_report_zh_latest.md](benchmark/hybrid_general_task_public_report_zh_latest.md)：最新中文公开重型报告
 - [benchmark/hybrid_general_task_public_report_en_latest.md](benchmark/hybrid_general_task_public_report_en_latest.md)：最新英文公开重型报告
+- [docs/release_update_v0.3.3.zh-CN.md](docs/release_update_v0.3.3.zh-CN.md)：`v0.3.3` 正式更新说明
+- [docs/release_update_v0.3.3.md](docs/release_update_v0.3.3.md)：`v0.3.3` release update notes
 - [docs/release_validation_latest.zh-CN.md](docs/release_validation_latest.zh-CN.md)：最新中文预发布重型报告
 - [docs/release_validation_latest.md](docs/release_validation_latest.md)：最新英文预发布重型报告
 - [docs/agent_compatibility.zh-CN.md](docs/agent_compatibility.zh-CN.md)：Agent 兼容性与默认安装边界说明
 - [docs/agent_compatibility.md](docs/agent_compatibility.md)：英文 Agent 兼容性说明
-- [docs/launch_announcement.zh-CN.md](docs/launch_announcement.zh-CN.md)：中文首发公告文案包
-- [docs/launch_announcement.md](docs/launch_announcement.md)：英文首发公告文案包
+- [docs/launch_announcement.zh-CN.md](docs/launch_announcement.zh-CN.md)：中文更新公告文案包
+- [docs/launch_announcement.md](docs/launch_announcement.md)：英文更新公告文案包
 - [STRATEGY.zh-CN.md](STRATEGY.zh-CN.md)：中文 tier 策略说明
 - [STRATEGY.md](STRATEGY.md)：英文 tier 策略说明
 - [RUNTIME_GUIDE.zh-CN.md](RUNTIME_GUIDE.zh-CN.md)：中文运行时挂接与升级规则
