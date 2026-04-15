@@ -29,4 +29,4 @@
 
 - 公开 benchmark 工件统一放在 `benchmark/`。
 - 预发布重型验证的权威报告仍在 `docs/release_validation_latest.md`。
-- 刷新后的通用任务公开报告位于 `benchmark/hybrid_general_task_public_report_en_latest.md` 及对应的 PDF/JSON 工件中。
+- 刷新后的通用任务公开报告位于 `benchmark/hybrid_general_task_public_report_zh_latest.md`、`benchmark/hybrid_general_task_public_report_en_latest.md` 及对应的 PDF/JSON 工件中。
