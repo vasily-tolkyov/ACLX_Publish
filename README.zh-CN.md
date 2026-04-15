@@ -123,8 +123,8 @@ ACL-X 是一套面向 AI agent 的高密度通信语言与可见运行时边界�
 - [benchmark/summary.md](benchmark/summary.md)：最新英文 benchmark 总览
 - [benchmark/hybrid_general_task_public_report_zh_latest.md](benchmark/hybrid_general_task_public_report_zh_latest.md)：最新中文公开重型报告
 - [benchmark/hybrid_general_task_public_report_en_latest.md](benchmark/hybrid_general_task_public_report_en_latest.md)：最新英文公开重型报告
-- [docs/release_update_v0.3.3.zh-CN.md](docs/release_update_v0.3.3.zh-CN.md)：`v0.3.3` 正式更新说明
-- [docs/release_update_v0.3.3.md](docs/release_update_v0.3.3.md)：`v0.3.3` release update notes
+- [docs/release_update_v0.3.4.zh-CN.md](docs/release_update_v0.3.4.zh-CN.md)：`v0.3.4` 正式更新说明
+- [docs/release_update_v0.3.4.md](docs/release_update_v0.3.4.md)：`v0.3.4` release update notes
 - [docs/release_validation_latest.zh-CN.md](docs/release_validation_latest.zh-CN.md)：最新中文预发布重型报告
 - [docs/release_validation_latest.md](docs/release_validation_latest.md)：最新英文预发布重型报告
 - [docs/agent_compatibility.zh-CN.md](docs/agent_compatibility.zh-CN.md)：Agent 兼容性与默认安装边界说明

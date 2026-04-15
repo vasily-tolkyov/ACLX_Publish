@@ -6,18 +6,18 @@ This document collects ready-to-use copy for the current public release update o
 
 ## Core Message
 
-- ACL-X `v0.3.3` is the current public release update of the hybrid strategy.
+- ACL-X `v0.3.4` is the current public release update of the hybrid strategy.
 - Release messaging remains quality-first: validated output quality must stay flat or improve.
 - The main optimization target in the current version is elapsed time.
 - Token behavior is real but tier-dependent rather than universal.
 - The current update strengthens the public `t2` efficiency claim with a refreshed general-task heavy run.
 - User feedback, failure cases, and benchmark comparisons are welcome.
 
-## What Changed In v0.3.3
+## What Changed In v0.3.4
 
-- Refreshed the public general-task benchmark package to merged run `20260415_110636_t2_refresh`.
-- Replaced the previously weak public `t2` slice with repaired results and a stronger efficiency profile.
-- Synchronized the public source tree, locked strategy files, runtime/session surfaces, and behavior-locking tests to the current accepted internal state.
+- Kept the public benchmark headline on the merged run `20260415_110636_t2_refresh`.
+- Hardened the synchronized public source tree so CI now verifies the release line consistently on both Windows and Linux.
+- Normalized strategy-lock hashing, project-relative path handling, and `TASK.md` contract-source loading across platform boundaries.
 - Kept bilingual public reports, machine-readable benchmark artifacts, and Codex-oriented installation assets aligned.
 
 ## Headline Benchmarks
@@ -35,7 +35,7 @@ This document collects ready-to-use copy for the current public release update o
 
 ## GitHub Release Blurb
 
-ACL-X `v0.3.3` is the current public release update of the hybrid strategy.
+ACL-X `v0.3.4` is the current public release update of the hybrid strategy.
 
 This update refreshes the public benchmark package, synchronizes the published source tree to the current locked strategy state, and strengthens the public efficiency story for `t2` without lowering validated output quality.
 
@@ -43,11 +43,11 @@ In one line: ACL-X helps bounded local agent workflows stay quality-first, optim
 
 The release message stays intentionally strict: ACL-X hybrid is quality-first, with elapsed time as the main optimization target. Token gains are real but tier-dependent, not universal. The refreshed public evidence now supports a stronger `t2` claim, while `t3` should still be described as time-first with smaller token upside and `t0` should still be described as exactness-first.
 
-We will continue improving this release line after `v0.3.3`, with ongoing work focused on stronger time optimization and stronger token optimization without lowering output quality. Usage reports, benchmark comparisons, and failure cases are welcome.
+We will continue improving this release line after `v0.3.4`, with ongoing work focused on stronger time optimization and stronger token optimization without lowering output quality. Usage reports, benchmark comparisons, and failure cases are welcome.
 
 ## Long Announcement
 
-We are publishing `v0.3.3` as the current public release update of the ACL-X hybrid strategy.
+We are publishing `v0.3.4` as the current public release update of the ACL-X hybrid strategy.
 
 This update keeps the repository aligned with the current locked strategy state: refreshed heavy benchmark artifacts, synchronized source and test surfaces, bilingual release documentation, and the Codex-oriented share-pack installation path.
 
@@ -61,7 +61,7 @@ The public message stays disciplined:
 - Codex gets the packaged default-on installation path in this release line
 - other agent hosts can reuse the strategy manually, but do not yet get a packaged default installer here
 
-The main release-facing change in `v0.3.3` is benchmark credibility and publication alignment. The refreshed general-task run moves the public aggregate to `31.78%` token improvement and `54.12%` time improvement while preserving quality, and it replaces the previously weaker public `t2` slice with repaired results that are now strong enough to support a clearer efficiency claim.
+The main release-facing change in `v0.3.4` is release-line stability. The public aggregate remains `31.78%` token improvement and `54.12%` time improvement on the refreshed general-task run, while the synchronized public source tree and CI behavior are now hardened across Windows and Linux so those benchmark claims sit on a more reliable publication base.
 
 This is still not a claim that every task will improve on every metric. The current release remains bounded by the validated task families documented in the repository.
 
@@ -69,10 +69,10 @@ After this update, we will continue strengthening the current version with more 
 
 ## Short Announcement
 
-ACL-X `v0.3.3` is now public.
+ACL-X `v0.3.4` is now public.
 
 This is the current public release update of the hybrid strategy: quality-first, time-first, and backed by refreshed heavy benchmarks plus synchronized bilingual docs and source. The new public general-task run also upgrades the release-facing `t2` efficiency story. Feedback and real-world test cases are welcome.
 
 ## Very Short Social Post
 
-ACL-X `v0.3.3` is live: refreshed public benchmark package, synced locked source tree, stronger public `t2` efficiency evidence, and no validated quality regression. Feedback welcome.
+ACL-X `v0.3.4` is live: same refreshed public benchmark package, a hardened cross-platform source line, green public CI on both Windows and Linux, and no validated quality regression. Feedback welcome.

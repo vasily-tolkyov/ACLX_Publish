@@ -42,8 +42,8 @@
 - [hybrid_general_task_public_report_en_latest.pdf](hybrid_general_task_public_report_en_latest.pdf)：最新英文 PDF
 - [hybrid_general_task_public_report_zh_latest.md](hybrid_general_task_public_report_zh_latest.md)：最新中文公开报告
 - [hybrid_general_task_public_report_zh_latest.pdf](hybrid_general_task_public_report_zh_latest.pdf)：最新中文 PDF
-- [../docs/release_update_v0.3.3.zh-CN.md](../docs/release_update_v0.3.3.zh-CN.md)：`v0.3.3` 正式更新说明
-- [../docs/release_update_v0.3.3.md](../docs/release_update_v0.3.3.md)：`v0.3.3` release update notes
+- [../docs/release_update_v0.3.4.zh-CN.md](../docs/release_update_v0.3.4.zh-CN.md)：`v0.3.4` 正式更新说明
+- [../docs/release_update_v0.3.4.md](../docs/release_update_v0.3.4.md)：`v0.3.4` release update notes
 - [hybrid_pre_release_heavy_latest.json](hybrid_pre_release_heavy_latest.json)：最新预发布重型机器可读汇总
 - [../docs/release_validation_latest.zh-CN.md](../docs/release_validation_latest.zh-CN.md)：权威的最新中文预发布重型报告
 - [../docs/release_validation_latest.md](../docs/release_validation_latest.md)：权威的最新英文预发布重型报告

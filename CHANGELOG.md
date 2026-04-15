@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.4 - 2026-04-15
+
+- Promoted the public GitHub sync line to `v0.3.4` after the source sync and benchmark refresh were fully stabilized.
+- Fixed cross-platform GitHub Actions drift by normalizing strategy-lock hashing across line endings and checkout text normalization.
+- Normalized project-root-relative path handling across Windows and Linux so ACL-X bundles, prompt hints, and locked tests no longer diverge by platform.
+- Added a root-level `TASK.md` contract-source fallback for prompts that mention an absolute task path, preserving doc-loop exactness loading in CI.
+- Kept the public benchmark headline unchanged while aligning package metadata and release-facing docs to the new patch version.
+
 ## v0.3.3 - 2026-04-15
 
 - Refreshed the public GitHub benchmark package with the merged general-task heavy run `20260415_110636_t2_refresh`.

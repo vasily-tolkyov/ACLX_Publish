@@ -42,8 +42,8 @@ These are tier aggregates from two heavy suites, not a promise that every task i
 - [hybrid_general_task_public_report_en_latest.pdf](hybrid_general_task_public_report_en_latest.pdf): latest English PDF
 - [hybrid_general_task_public_report_zh_latest.md](hybrid_general_task_public_report_zh_latest.md): latest Chinese public report
 - [hybrid_general_task_public_report_zh_latest.pdf](hybrid_general_task_public_report_zh_latest.pdf): latest Chinese PDF
-- [../docs/release_update_v0.3.3.md](../docs/release_update_v0.3.3.md): `v0.3.3` release update notes
-- [../docs/release_update_v0.3.3.zh-CN.md](../docs/release_update_v0.3.3.zh-CN.md): Chinese `v0.3.3` release update notes
+- [../docs/release_update_v0.3.4.md](../docs/release_update_v0.3.4.md): `v0.3.4` release update notes
+- [../docs/release_update_v0.3.4.zh-CN.md](../docs/release_update_v0.3.4.zh-CN.md): Chinese `v0.3.4` release update notes
 - [hybrid_pre_release_heavy_latest.json](hybrid_pre_release_heavy_latest.json): latest machine-readable pre-release heavy summary
 - [../docs/release_validation_latest.zh-CN.md](../docs/release_validation_latest.zh-CN.md): canonical latest Chinese pre-release heavy report
 - [../docs/release_validation_latest.md](../docs/release_validation_latest.md): canonical latest pre-release heavy report

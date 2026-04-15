@@ -123,8 +123,8 @@ These figures are tier aggregates from two heavy suites, not a guarantee that ev
 - [benchmark/summary.zh-CN.md](benchmark/summary.zh-CN.md): latest Chinese benchmark index and file map
 - [benchmark/hybrid_general_task_public_report_en_latest.md](benchmark/hybrid_general_task_public_report_en_latest.md): latest English public heavy report
 - [benchmark/hybrid_general_task_public_report_zh_latest.md](benchmark/hybrid_general_task_public_report_zh_latest.md): latest Chinese public heavy report
-- [docs/release_update_v0.3.3.md](docs/release_update_v0.3.3.md): `v0.3.3` release update notes
-- [docs/release_update_v0.3.3.zh-CN.md](docs/release_update_v0.3.3.zh-CN.md): Chinese `v0.3.3` release update notes
+- [docs/release_update_v0.3.4.md](docs/release_update_v0.3.4.md): `v0.3.4` release update notes
+- [docs/release_update_v0.3.4.zh-CN.md](docs/release_update_v0.3.4.zh-CN.md): Chinese `v0.3.4` release update notes
 - [docs/release_validation_latest.zh-CN.md](docs/release_validation_latest.zh-CN.md): latest Chinese release-validation report
 - [docs/release_validation_latest.md](docs/release_validation_latest.md): canonical latest pre-release heavy report
 - [docs/agent_compatibility.md](docs/agent_compatibility.md): host-compatibility and default-installation boundary
