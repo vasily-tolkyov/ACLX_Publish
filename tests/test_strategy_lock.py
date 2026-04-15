@@ -14,7 +14,7 @@ class StrategyLockTests(unittest.TestCase):
         reset_strategy_lock_cache()
 
     def test_real_strategy_manifest_verifies(self) -> None:
-        checked = verify_strategy_lock(project_root=r"D:\codex\acl_x")
+        checked = verify_strategy_lock(project_root=Path(__file__).resolve().parents[1])
         self.assertIn("configs/hybrid_router_map.yaml", checked)
         self.assertIn("configs/tier_strategies/t0.yaml", checked)
         self.assertIn("configs/tier_strategies/t1.yaml", checked)
@@ -54,9 +54,41 @@ class StrategyLockTests(unittest.TestCase):
             with self.assertRaises(StrategyLockError):
                 verify_strategy_lock(project_root=root)
 
+    def test_strategy_lock_normalizes_text_line_endings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "configs").mkdir(parents=True)
+            alpha = root / "alpha.txt"
+            alpha.write_text("alpha\nbeta\n", encoding="utf-8")
+            (root / "configs" / "strategy_lock.json").write_text(
+                json.dumps(
+                    {
+                        "lock_name": "test-lock",
+                        "files": {
+                            "alpha.txt": _sha256(alpha),
+                        },
+                    },
+                    ensure_ascii=True,
+                    indent=2,
+                    sort_keys=True,
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual(verify_strategy_lock(project_root=root)["alpha.txt"], _sha256(alpha))
+            alpha.write_bytes("alpha\r\nbeta\r\n".encode("utf-8"))
+            reset_strategy_lock_cache()
+            self.assertEqual(verify_strategy_lock(project_root=root)["alpha.txt"], _sha256(alpha))
+
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    data = path.read_bytes()
+    try:
+        text = data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        normalized = data
+    else:
+        normalized = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return hashlib.sha256(normalized).hexdigest()
 
 
 if __name__ == "__main__":
