@@ -32,8 +32,8 @@ Chinese version: [RELEASE_CHECKLIST.zh-CN.md](RELEASE_CHECKLIST.zh-CN.md).
 
 ## Notes
 
-- The current headline benchmark for release messaging should come from general-task run `20260413_160451`.
+- The current headline benchmark for release messaging should come from general-task run `20260415_110636_t2_refresh`.
 - The latest bounded engineering release gate should come from pre-release run `20260413_152717`.
 - Human-readable pre-release validation lives under `docs/`; `benchmark/` keeps machine-readable summaries and PDF artifacts.
-- `t0` still needs caution on tiny fixed-format tasks where token savings can be negative even when quality and time stay acceptable.
+- `t0` still needs caution on tiny fixed-format tasks where token and time results remain noise-sensitive even when quality stays acceptable.
 - Release wording should distinguish "Codex default-on installation" from "manual integration for other agent hosts".
