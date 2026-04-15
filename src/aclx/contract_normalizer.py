@@ -18,7 +18,7 @@ _EXACTNESS_PATTERNS = (
     "output in markdown",
     "one of ",
 )
-_SOURCE_REF_PATTERN = re.compile(r"`([^`]+)`|(?P<path>(?:[A-Za-z]:)?[A-Za-z0-9_~.\-/\\]+\.[A-Za-z0-9]{1,8})")
+_SOURCE_REF_PATTERN = re.compile(r"`([^`]+)`|(?P<path>(?:[A-Za-z]:)?[A-Za-z0-9_.\-/\\]+\.[A-Za-z0-9]{1,8})")
 
 
 def normalize_task_to_contract(

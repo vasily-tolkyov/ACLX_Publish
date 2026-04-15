@@ -4,6 +4,7 @@
 
 - Refreshed the public GitHub benchmark package with the merged general-task heavy run `20260415_110636_t2_refresh`.
 - Replaced the previously weak public `t2` slice with the repaired `t2` benchmark results, lifting the published `t2` aggregate to `48.26%` token optimization and `61.36%` time optimization with no quality regression.
+- Synchronized the public source tree, tier configs, adapter/runtime files, and behavior-locking tests to the current locked hybrid strategy state.
 - Updated the release-facing README, benchmark summary, and latest English and Chinese public reports to the new headline numbers.
 
 ## v0.3.2 - 2026-04-14

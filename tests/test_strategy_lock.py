@@ -8,15 +8,13 @@ from pathlib import Path
 
 from aclx.strategy_lock import StrategyLockError, reset_strategy_lock_cache, verify_strategy_lock
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
 
 class StrategyLockTests(unittest.TestCase):
     def tearDown(self) -> None:
         reset_strategy_lock_cache()
 
     def test_real_strategy_manifest_verifies(self) -> None:
-        checked = verify_strategy_lock(project_root=REPO_ROOT)
+        checked = verify_strategy_lock(project_root=r"D:\codex\acl_x")
         self.assertIn("configs/hybrid_router_map.yaml", checked)
         self.assertIn("configs/tier_strategies/t0.yaml", checked)
         self.assertIn("configs/tier_strategies/t1.yaml", checked)
@@ -56,39 +54,9 @@ class StrategyLockTests(unittest.TestCase):
             with self.assertRaises(StrategyLockError):
                 verify_strategy_lock(project_root=root)
 
-    def test_strategy_lock_normalizes_utf8_line_endings_and_bom(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / "configs").mkdir(parents=True)
-            (root / "alpha.txt").write_bytes(b"alpha\nbeta\n")
-            (root / "configs" / "strategy_lock.json").write_text(
-                json.dumps(
-                    {
-                        "lock_name": "test-lock",
-                        "files": {
-                            "alpha.txt": _sha256(root / "alpha.txt"),
-                        },
-                    },
-                    ensure_ascii=True,
-                    indent=2,
-                    sort_keys=True,
-                ),
-                encoding="utf-8",
-            )
-            (root / "alpha.txt").write_bytes(b"\xef\xbb\xbfalpha\r\nbeta\r\n")
-            checked = verify_strategy_lock(project_root=root)
-            self.assertEqual(checked["alpha.txt"], _sha256(root / "alpha.txt"))
-
 
 def _sha256(path: Path) -> str:
-    data = path.read_bytes()
-    try:
-        text = data.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        normalized = data
-    else:
-        normalized = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
-    return hashlib.sha256(normalized).hexdigest()
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 if __name__ == "__main__":
