@@ -10,7 +10,7 @@ This document collects ready-to-use copy for the current public release update o
 - Release messaging remains quality-first: validated output quality must stay flat or improve.
 - The main optimization target in the current version is elapsed time.
 - Token behavior is real but tier-dependent rather than universal.
-- The current update strengthens the public `t2` efficiency claim with a refreshed general-task heavy run.
+- The current update hardens the public release line with cross-platform source and CI stability fixes.
 - User feedback, failure cases, and benchmark comparisons are welcome.
 
 ## What Changed In v0.3.4
@@ -37,7 +37,7 @@ This document collects ready-to-use copy for the current public release update o
 
 ACL-X `v0.3.4` is the current public release update of the hybrid strategy.
 
-This update refreshes the public benchmark package, synchronizes the published source tree to the current locked strategy state, and strengthens the public efficiency story for `t2` without lowering validated output quality.
+This update keeps the public benchmark package aligned, hardens the published source tree and CI behavior across platforms, and preserves the current validated efficiency claims without lowering output quality.
 
 In one line: ACL-X helps bounded local agent workflows stay quality-first, optimize time aggressively where validated, and add machine-readable structure only when runtime facts justify it.
 
@@ -49,7 +49,7 @@ We will continue improving this release line after `v0.3.4`, with ongoing work f
 
 We are publishing `v0.3.4` as the current public release update of the ACL-X hybrid strategy.
 
-This update keeps the repository aligned with the current locked strategy state: refreshed heavy benchmark artifacts, synchronized source and test surfaces, bilingual release documentation, and the Codex-oriented share-pack installation path.
+This update keeps the repository aligned with the current locked strategy state: refreshed heavy benchmark artifacts, hardened cross-platform source and test surfaces, bilingual release documentation, and the Codex-oriented share-pack installation path.
 
 Who this is for: builders and operators of bounded local AI-agent workflows who want clearer routing, cleaner handoffs, reusable machine state, and faster validated execution without giving up output quality discipline.
 
@@ -71,7 +71,7 @@ After this update, we will continue strengthening the current version with more 
 
 ACL-X `v0.3.4` is now public.
 
-This is the current public release update of the hybrid strategy: quality-first, time-first, and backed by refreshed heavy benchmarks plus synchronized bilingual docs and source. The new public general-task run also upgrades the release-facing `t2` efficiency story. Feedback and real-world test cases are welcome.
+This is the current public release update of the hybrid strategy: quality-first, time-first, and backed by refreshed heavy benchmarks plus a hardened cross-platform source line and synchronized bilingual docs. Feedback and real-world test cases are welcome.
 
 ## Very Short Social Post
 
