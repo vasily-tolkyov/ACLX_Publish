@@ -3,7 +3,9 @@
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from functools import lru_cache
+import ntpath
 from pathlib import Path
+import posixpath
 import re
 from typing import Any
 
@@ -744,9 +746,12 @@ class ACLXHybridPromptBuilder:
         if not text:
             return ""
         if cwd:
-            base = Path(cwd)
+            base = str(cwd or "").strip().replace("\\", "/")
+            relative = _relative_path_text(text, base)
+            if relative is not None:
+                return relative
             try:
-                rel = Path(text).resolve().relative_to(base.resolve())
+                rel = Path(text).resolve().relative_to(Path(cwd).resolve())
             except Exception:
                 return text
             return rel.as_posix() or "."
@@ -767,6 +772,46 @@ class ACLXHybridPromptBuilder:
             text = text[:9] + "-" + text[-8:]
         atom = f"{prefix}.{text}" if text else prefix
         return atom[:24]
+
+
+def _relative_path_text(target: str, base: str) -> str | None:
+    relative = _relative_windows_path(target, base)
+    if relative is not None:
+        return relative
+    return _relative_posix_path(target, base)
+
+
+def _relative_windows_path(target: str, base: str) -> str | None:
+    if not (_looks_like_windows_absolute_path(target) and _looks_like_windows_absolute_path(base)):
+        return None
+    target_raw = target.replace("/", "\\")
+    base_raw = base.replace("/", "\\")
+    target_norm = ntpath.normcase(ntpath.normpath(target_raw))
+    base_norm = ntpath.normcase(ntpath.normpath(base_raw))
+    prefix = base_norm.rstrip("\\")
+    if target_norm == base_norm:
+        return "."
+    if not target_norm.startswith(prefix + "\\"):
+        return None
+    return ntpath.relpath(target_raw, base_raw).replace("\\", "/")
+
+
+def _relative_posix_path(target: str, base: str) -> str | None:
+    if not (target.startswith("/") and base.startswith("/")):
+        return None
+    target_norm = posixpath.normpath(target)
+    base_norm = posixpath.normpath(base)
+    prefix = base_norm.rstrip("/")
+    if target_norm == base_norm:
+        return "."
+    if not target_norm.startswith(prefix + "/"):
+        return None
+    return posixpath.relpath(target_norm, base_norm)
+
+
+def _looks_like_windows_absolute_path(value: str) -> bool:
+    text = str(value or "").strip()
+    return bool(re.match(r"^[A-Za-z]:[\\/]", text)) or text.startswith("\\\\")
 
 
 @lru_cache(maxsize=1024)

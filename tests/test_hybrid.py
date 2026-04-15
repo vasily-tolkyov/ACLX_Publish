@@ -235,7 +235,7 @@ class HybridPromptTests(unittest.TestCase):
         self.assertEqual(payload.tier, "t2")
         self.assertEqual(payload.bridge_mode, "session")
         self.assertIn("Machine contract:", payload.prompt)
-        self.assertIn("Must write: D:\\codex\\acl_x\\runtime\\shared_state.aclx", payload.prompt)
+        self.assertIn("Must write: runtime/shared_state.aclx", payload.prompt)
         self.assertIn("Done when: review notes keep Risk and Evidence sections", payload.prompt)
         self.assertNotIn("cwd=", payload.aclx_bundle)
         self.assertNotIn("t=nl", payload.aclx_bundle)
