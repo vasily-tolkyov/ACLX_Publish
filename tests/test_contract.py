@@ -81,6 +81,24 @@ class ContractTests(unittest.TestCase):
             self.assertIn("- keep heading `# guide`", contract.exactness_rules)
             self.assertIn("docs/guide.md", contract.source_refs)
 
+    def test_normalizer_absorbs_root_task_md_when_prompt_uses_absolute_task_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            task_path = root / "TASK.md"
+            task_path.write_text(
+                "Rewrite `docs/guide.md`.\n"
+                "- keep heading `# guide`\n"
+                "- include `next step` in `docs/guide.md`\n",
+                encoding="utf-8",
+            )
+            contract = normalize_task_to_contract(
+                f"Read {task_path}.\nRewrite `docs/guide.md`.",
+                project_root=root,
+                required_artifacts=["docs/guide.md"],
+            )
+            self.assertIn("TASK.md", contract.metadata["contract_sources"])
+            self.assertIn("- keep heading `# guide`", contract.exactness_rules)
+
     def test_generic_filesystem_adapter_supports_non_python_generic_tasks(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

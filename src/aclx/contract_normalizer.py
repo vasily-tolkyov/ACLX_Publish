@@ -47,6 +47,7 @@ def normalize_task_to_contract(
     source_root = Path(project_root) if project_root is not None else None
     exactness_rules = extract_exactness_rules(task_description)
     source_refs = _normalize_project_paths(extract_source_refs(task_description), source_root)
+    source_refs = _inject_workspace_contract_sources(source_refs, source_root, task_description)
     contract_source_data = _load_contract_sources(source_root, source_refs)
     if contract_source_data["exactness_rules"]:
         exactness_rules = _clean_list(exactness_rules + list(contract_source_data["exactness_rules"]))
@@ -289,6 +290,20 @@ def _looks_like_contract_source(path_text: str) -> bool:
 
 def _normalize_project_paths(values: list[str] | None, root: Path | None) -> list[str]:
     return _clean_list([_project_relative_path(value, root) for value in list(values or [])])
+
+
+def _inject_workspace_contract_sources(source_refs: list[str], root: Path | None, task_description: str) -> list[str]:
+    refs = list(source_refs or [])
+    if root is None or not root.exists():
+        return _clean_list(refs)
+    lowered = str(task_description or "").replace("\\", "/").lower()
+    for candidate in ("TASK.md", "TASK.txt", "TASK.rst"):
+        if candidate.lower() not in lowered:
+            continue
+        path = root / candidate
+        if path.exists():
+            refs.append(candidate)
+    return _clean_list(refs)
 
 
 def _project_relative_path(value: str, root: Path | None) -> str:
