@@ -1,0 +1,27 @@
+version: 1
+module: aclx-hybrid-strategy
+owner: vasily-tolkyov
+visibility: interface-only
+exports:
+  - path: README.md
+    scope: summary-read
+    description: Project overview
+protected:
+  - path: .env
+    reason: Environment secrets are private
+  - path: .env.*
+    reason: Environment secrets are private
+  - path: "**/.env*"
+    reason: Nested environment secrets are private
+  - path: "**/*.pem"
+    reason: Private keys are never shared
+  - path: "**/*.key"
+    reason: Private keys are never shared
+  - path: "**/*secret*"
+    reason: Secret material is never shared
+allowed_requests:
+  - summary
+  - interface_summary
+  - explain_permission
+requires_approval:
+  - owner_review

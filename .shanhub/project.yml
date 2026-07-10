@@ -1,0 +1,16 @@
+version: 1
+project: ACLX_hybrid_Strategy workspace
+default_visibility: project-read
+pm_agent:
+  mode: deepseek-server
+  name: ShanHub PM Agent
+  style: concise
+  default_request_policy: least_context
+  patch_proposals: allowed_with_owner_review
+  expose_pm_only_raw_files: false
+modules:
+  - id: aclx-hybrid-strategy
+    owner: vasily-tolkyov
+    repository: vasily-tolkyov/ACLX_hybrid_Strategy
+    root: .
+    manifest: .shanhub/module.yml
