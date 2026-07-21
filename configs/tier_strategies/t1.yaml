@@ -19,5 +19,5 @@ tiers:
     include_completed: false
     include_cwd: false
     include_transport_meta: false
-    include_profile_state: true
+    include_profile_state: false
     include_task_ref_state: false

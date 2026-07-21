@@ -31,7 +31,9 @@ DEFAULT_SUPERVISOR_TASK = (
     "Keep human-facing output concise. "
     "Avoid unnecessary shell exploration and only run commands that materially improve correctness."
 )
-T0_COMPACT_GUARD = "Keep the required output shape and explicit literal facts verbatim."
+T0_OUTPUT_SHAPE_GUARD = "Keep the required output shape exact."
+T0_LITERAL_FACT_GUARD = "Keep explicit literal facts verbatim."
+T0_EXACT_OUTPUT_GUARD = "Keep output shape exact; keep literal facts verbatim."
 T0_MINIMAL_AGENTS = (
     "# T0\n"
     "One-shot NL only. No ACL-X bundles, runtime files, skills, or handoffs. "
@@ -174,9 +176,16 @@ class ACLXSupervisor:
             if doc_loop_compaction:
                 if "doc_loop_reasoning_effort" in tier_config:
                     reasoning_effort = str(tier_config.get("doc_loop_reasoning_effort") or "").strip()
+            prompt_task = task
+            if tier == "t1":
+                prompt_task = _compact_t1_task(
+                    task,
+                    outputs=outputs,
+                    constraints=constraints,
+                )
             hybrid_payload = self.hybrid.build_prompt(
                 HybridTaskSpec(
-                    task=task,
+                    task=prompt_task,
                     profile=resolved_profile,
                     lane=lane,
                     tier=tier,
@@ -544,6 +553,87 @@ def _compact_runtime_task(
     return "\n".join(kept).strip() or text
 
 
+def _compact_t1_task(task: str, *, outputs: list[str], constraints: list[str]) -> str:
+    text = str(task or "").strip()
+    if not text:
+        return text
+    output_markers = {value.replace("\\", "/").lower() for value in outputs}
+    semantic_lines: list[str] = []
+    fallback_lines: list[str] = []
+    for raw_line in text.splitlines():
+        line = _strip_t1_runtime_carrier_clauses(raw_line.strip(), output_markers=output_markers)
+        if not line:
+            continue
+        lowered = line.lower()
+        normalized = line.replace("\\", "/").lower()
+        if _is_runtime_boilerplate_line(lowered):
+            continue
+        if lowered.startswith("delegate "):
+            continue
+        if lowered.startswith("write ") and any(marker and marker in normalized for marker in output_markers):
+            continue
+        if any(marker and marker in normalized for marker in output_markers) and (
+            "must contain" in lowered or "must include" in lowered or "heading `" in lowered or "headings `" in lowered
+        ):
+            continue
+        if _is_main_task_line(lowered) or lowered.startswith(("identify ", "explain ", "find ")):
+            semantic_lines.append(line)
+            continue
+        fallback_lines.append(line)
+    ordered = _unique_lines(semantic_lines + fallback_lines)
+    if not ordered:
+        return text
+    primary_lines = ordered[:2]
+    if len(primary_lines) == 2:
+        merged = _merge_t1_semantic_lines(primary_lines[0], primary_lines[1])
+        if merged:
+            return merged
+    return "\n".join(primary_lines)
+
+
+def _merge_t1_semantic_lines(first: str, second: str) -> str:
+    head = str(first or "").strip()
+    tail = str(second or "").strip()
+    if not head or not tail:
+        return ""
+    lowered_head = head.lower()
+    lowered_tail = tail.lower()
+    if not lowered_head.startswith("inspect "):
+        return ""
+    if not lowered_tail.startswith(("identify ", "explain ", "find ")):
+        return ""
+    return f"{head.rstrip('.')} and {tail[:1].lower() + tail[1:]}"
+
+
+def _strip_t1_runtime_carrier_clauses(line: str, *, output_markers: set[str]) -> str:
+    text = str(line or "").strip()
+    if not text:
+        return ""
+    lowered = text.lower()
+    delegation_markers = (
+        ", delegate exactly once to one reviewer pass",
+        ", delegate exactly once",
+        ", delegate once",
+        " and delegate exactly once to one reviewer pass",
+        " and delegate exactly once",
+        " and delegate once",
+    )
+    for marker in delegation_markers:
+        index = lowered.find(marker)
+        if index != -1:
+            text = text[:index].rstrip(" ,.;")
+            lowered = text.lower()
+            break
+    normalized = text.replace("\\", "/").lower()
+    if any(marker and marker in normalized for marker in output_markers):
+        write_index = lowered.find(" and write ")
+        if write_index == -1:
+            write_index = lowered.find(", write ")
+        if write_index != -1:
+            text = text[:write_index].rstrip(" ,.;")
+    return text.strip()
+
+
 def _tier_router_config(tier: str) -> dict[str, object]:
     tiers = load_hybrid_router_map().get("tiers") or {}
     selected = tiers.get(str(tier).lower()) or {}
@@ -560,13 +650,29 @@ def _compose_t0_prompt(task: str, guard_lines: list[str]) -> str:
 def _selective_t0_guard_lines(task: str, *, guard_mode: str, max_guard_lines: int) -> list[str]:
     if str(guard_mode or "").strip().lower() != "selective":
         return []
-    if not (_t0_has_output_shape_signal(task) or _t0_has_literal_fact_signal(task)):
+    has_output_shape = _t0_has_output_shape_signal(task)
+    has_literal_facts = _t0_has_literal_fact_signal(task)
+    if not (has_output_shape or has_literal_facts):
         return []
-    return [T0_COMPACT_GUARD][: max(0, int(max_guard_lines))]
+    if _t0_has_self_sufficient_exact_output_task(
+        task,
+        has_output_shape=has_output_shape,
+        has_literal_facts=has_literal_facts,
+    ):
+        return []
+    return [_t0_guard_line(has_output_shape=has_output_shape, has_literal_facts=has_literal_facts)][: max(0, int(max_guard_lines))]
 
 
 def _t0_reasoning_effort(task: str, tier_config: dict[str, object]) -> str:
-    if _t0_has_output_shape_signal(task) or _t0_has_literal_fact_signal(task):
+    has_output_shape = _t0_has_output_shape_signal(task)
+    has_literal_facts = _t0_has_literal_fact_signal(task)
+    if _t0_has_self_sufficient_exact_output_task(
+        task,
+        has_output_shape=has_output_shape,
+        has_literal_facts=has_literal_facts,
+    ):
+        return ""
+    if has_output_shape or has_literal_facts:
         return str(tier_config.get("exact_output_reasoning_effort", "low") or "low").strip()
     return str(tier_config.get("generic_reasoning_effort", "medium") or "medium").strip()
 
@@ -576,12 +682,7 @@ def _t0_has_output_shape_signal(task: str) -> bool:
     lowered = text.lower()
     if "return exactly" in lowered or re.search(r"\bexactly\s+\d+\s+non-empty\s+lines?\b", lowered):
         return True
-    field_lines = 0
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-        if re.match(r"^(tier|decision|evidence)\s*:", line, re.IGNORECASE):
-            field_lines += 1
-    return field_lines >= 2
+    return _t0_structured_field_line_count(text) >= 2
 
 
 def _t0_has_literal_fact_signal(task: str) -> bool:
@@ -591,6 +692,49 @@ def _t0_has_literal_fact_signal(task: str) -> bool:
     if "mention " in lowered and " and " in lowered:
         return True
     return bool(re.search(r"\bkeep\b.+\bliteral\b", lowered))
+
+
+def _t0_guard_line(*, has_output_shape: bool, has_literal_facts: bool) -> str:
+    if has_output_shape and has_literal_facts:
+        return T0_EXACT_OUTPUT_GUARD
+    if has_output_shape:
+        return T0_OUTPUT_SHAPE_GUARD
+    return T0_LITERAL_FACT_GUARD
+
+
+def _t0_has_self_sufficient_exact_output_task(
+    task: str,
+    *,
+    has_output_shape: bool,
+    has_literal_facts: bool,
+) -> bool:
+    if not (has_output_shape and has_literal_facts):
+        return False
+    text = str(task or "")
+    structured_field_lines = _t0_structured_field_line_count(text)
+    if structured_field_lines < 2:
+        return False
+    has_exact_line_count = bool(re.search(r"\breturn exactly\b", text, re.IGNORECASE))
+    has_literal_field = any(_t0_line_has_literal_directive(raw_line.strip()) for raw_line in text.splitlines())
+    return has_literal_field and has_exact_line_count
+
+
+def _t0_structured_field_line_count(task: str) -> int:
+    field_lines = 0
+    for raw_line in str(task or "").splitlines():
+        line = raw_line.strip()
+        if re.match(r"^(tier|decision|evidence)\s*:", line, re.IGNORECASE):
+            field_lines += 1
+    return field_lines
+
+
+def _t0_line_has_literal_directive(line: str) -> bool:
+    lowered = str(line or "").strip().lower()
+    if not lowered:
+        return False
+    if "must include" in lowered or "verbatim" in lowered:
+        return True
+    return "mention " in lowered
 
 
 def _compact_task_contract_lines(

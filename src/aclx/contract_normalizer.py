@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ntpath
+import posixpath
 import re
 from pathlib import Path
 from typing import Any
@@ -18,7 +20,7 @@ _EXACTNESS_PATTERNS = (
     "output in markdown",
     "one of ",
 )
-_SOURCE_REF_PATTERN = re.compile(r"`([^`]+)`|(?P<path>(?:[A-Za-z]:)?[A-Za-z0-9_~.\-/\\]+\.[A-Za-z0-9]{1,8})")
+_SOURCE_REF_PATTERN = re.compile(r"`([^`]+)`|(?P<path>(?:[A-Za-z]:)?[A-Za-z0-9_.\-/\\]+\.[A-Za-z0-9]{1,8})")
 
 
 def normalize_task_to_contract(
@@ -44,14 +46,17 @@ def normalize_task_to_contract(
     goal = _goal_from_task(task_description)
     source_root = Path(project_root) if project_root is not None else None
     exactness_rules = extract_exactness_rules(task_description)
-    source_refs = extract_source_refs(task_description)
+    source_refs = _normalize_project_paths(extract_source_refs(task_description), source_root)
+    source_refs = _inject_workspace_contract_sources(source_refs, source_root, task_description)
     contract_source_data = _load_contract_sources(source_root, source_refs)
     if contract_source_data["exactness_rules"]:
         exactness_rules = _clean_list(exactness_rules + list(contract_source_data["exactness_rules"]))
     if contract_source_data["source_refs"]:
-        source_refs = _clean_list(source_refs + list(contract_source_data["source_refs"]))
-    output_artifacts = _clean_list(required_artifacts)
-    input_artifacts = _clean_list(inputs)
+        source_refs = _normalize_project_paths(source_refs + list(contract_source_data["source_refs"]), source_root)
+    output_artifacts = _normalize_project_paths(required_artifacts, source_root)
+    input_artifacts = _normalize_project_paths(inputs, source_root)
+    normalized_scope_in = _normalize_project_paths(scope_in, source_root)
+    normalized_scope_out = _normalize_project_paths(scope_out, source_root)
     runtime_needs = infer_runtime_needs(
         task_description,
         expected_handoffs=expected_handoffs,
@@ -69,13 +74,13 @@ def normalize_task_to_contract(
         task_description,
         required_artifacts=output_artifacts,
         inputs=input_artifacts,
-        scope_in=scope_in,
+        scope_in=normalized_scope_in,
     )
     return TaskContract(
         goal=goal,
         operation=infer_operation(task_description),
-        scope_in=_clean_list(scope_in),
-        scope_out=_clean_list(scope_out),
+        scope_in=normalized_scope_in,
+        scope_out=normalized_scope_out,
         input_artifacts=input_artifacts,
         output_artifacts=output_artifacts,
         exactness_rules=exactness_rules,
@@ -281,6 +286,78 @@ def _looks_like_contract_source(path_text: str) -> bool:
     if lowered.endswith(("task.md", "task.txt", "task.rst")):
         return True
     return lowered.endswith((".md", ".txt", ".rst"))
+
+
+def _normalize_project_paths(values: list[str] | None, root: Path | None) -> list[str]:
+    return _clean_list([_project_relative_path(value, root) for value in list(values or [])])
+
+
+def _inject_workspace_contract_sources(source_refs: list[str], root: Path | None, task_description: str) -> list[str]:
+    refs = list(source_refs or [])
+    if root is None or not root.exists():
+        return _clean_list(refs)
+    lowered = str(task_description or "").replace("\\", "/").lower()
+    for candidate in ("TASK.md", "TASK.txt", "TASK.rst"):
+        if candidate.lower() not in lowered:
+            continue
+        path = root / candidate
+        if path.exists():
+            refs.append(candidate)
+    return _clean_list(refs)
+
+
+def _project_relative_path(value: str, root: Path | None) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    normalized = text.replace("\\", "/")
+    if root is None:
+        return normalized
+    base = str(root).strip().replace("\\", "/")
+    if not base:
+        return normalized
+    relative = _relative_under_base(normalized, base, windows=True)
+    if relative is not None:
+        return relative
+    relative = _relative_under_base(normalized, base, windows=False)
+    if relative is not None:
+        return relative
+    return normalized
+
+
+def _relative_under_base(target: str, base: str, *, windows: bool) -> str | None:
+    if windows:
+        if not (_looks_like_windows_absolute_path(target) and _looks_like_windows_absolute_path(base)):
+            return None
+        target_raw = target.replace("/", "\\")
+        base_raw = base.replace("/", "\\")
+        target_norm = ntpath.normcase(ntpath.normpath(target_raw))
+        base_norm = ntpath.normcase(ntpath.normpath(base_raw))
+        prefix = base_norm.rstrip("\\")
+        if target_norm == base_norm:
+            return "."
+        if not target_norm.startswith(prefix + "\\"):
+            return None
+        return ntpath.relpath(target_raw, base_raw).replace("\\", "/")
+    if not (_looks_like_posix_absolute_path(target) and _looks_like_posix_absolute_path(base)):
+        return None
+    target_norm = posixpath.normpath(target)
+    base_norm = posixpath.normpath(base)
+    prefix = base_norm.rstrip("/")
+    if target_norm == base_norm:
+        return "."
+    if not target_norm.startswith(prefix + "/"):
+        return None
+    return posixpath.relpath(target_norm, base_norm)
+
+
+def _looks_like_windows_absolute_path(value: str) -> bool:
+    text = str(value or "").strip()
+    return bool(re.match(r"^[A-Za-z]:[\\/]", text)) or text.startswith("\\\\")
+
+
+def _looks_like_posix_absolute_path(value: str) -> bool:
+    return str(value or "").strip().startswith("/")
 
 
 def _merge_metadata(left: dict[str, Any] | None, right: dict[str, Any] | None) -> dict[str, Any]:

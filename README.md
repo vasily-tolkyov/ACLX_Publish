@@ -23,18 +23,18 @@ Current public release verdict: `GO`.
 
 Latest heavy reports:
 
-- general-task heavy run `20260413_160451`: `46.87%` aggregate token improvement, `65.31%` aggregate time improvement, `+0.75` quality delta
+- general-task heavy run `20260415_110636_t2_refresh`: `31.78%` aggregate token improvement, `54.12%` aggregate time improvement, `+0.75` quality delta
 - pre-release heavy run `20260413_152717`: `66.35%` aggregate token improvement, `71.16%` aggregate time improvement, `+5.00` quality delta
 
 Start with [benchmark/summary.md](benchmark/summary.md), then read the latest public report in [benchmark/hybrid_general_task_public_report_en_latest.md](benchmark/hybrid_general_task_public_report_en_latest.md).
 
-## Launch Note
+## Release Update Note
 
-This is the first formal public release of the current ACL-X hybrid strategy.
+This is the current public release update of the ACL-X hybrid strategy.
 
 - The release message stays quality-first: output quality must not regress on the validated suites.
 - The main optimization target for the current version remains elapsed time.
-- Follow-up work will continue to strengthen both time optimization and token optimization on top of the current release, with extra attention to improving token behavior beyond the already strong `t1` wins.
+- Follow-up work will continue to strengthen both time optimization and token optimization on top of the current release, with extra attention to improving `t3` token efficiency and preserving the current stronger `t2` gains.
 - Usage reports, failure cases, and benchmark comparisons are welcome through repository feedback channels.
 
 ## Which Tier To Use
@@ -91,7 +91,7 @@ Supported public workflows today:
 | Suite | Run ID | Tokens | Time | Quality | Read this as |
 | --- | --- | ---: | ---: | ---: | --- |
 | Pre-release heavy | `20260413_152717` | `+66.35%` | `+71.16%` | `+5.00` | bounded local engineering tasks with explicit artifact contracts |
-| General-task heavy | `20260413_160451` | `+46.87%` | `+65.31%` | `+0.75` | generic non-ACLX structured tasks with validators and clear closure conditions |
+| General-task heavy | `20260415_110636_t2_refresh` | `+31.78%` | `+54.12%` | `+0.75` | generic non-ACLX structured tasks with validators and clear closure conditions |
 
 ## Optimization Priority
 
@@ -99,14 +99,14 @@ Supported public workflows today:
 - The main optimization target is elapsed time, not tokens.
 - Token behavior is tier-dependent. Use the two heavy runs below as the public reference instead of claiming universal token savings.
 
-| Tier | Route shape | Public message | Pre-release heavy `20260413_152717` | General-task heavy `20260413_160451` |
+| Tier | Route shape | Public message | Pre-release heavy `20260413_152717` | General-task heavy `20260415_110636_t2_refresh` |
 | --- | --- | --- | --- | --- |
-| `t0` | Single-surface work with no real handoff, no shared machine state, and no loop | Exactness-first tier. Time can still improve, but tokens tend to regress on tiny fixed-format tasks. | token `-46.73%`, time `+31.89%`, quality `+5.00` | token `-12.11%`, time `+29.62%`, quality `+0.00` |
-| `t1` | Exactly one deliberate handoff or one child-agent review pass | Strongest repeat aggregate token and time win. This is the clearest token-optimization tier in the current evidence set. | token `+76.08%`, time `+79.52%`, quality `+0.00` | token `+68.59%`, time `+72.69%`, quality `+0.00` |
-| `t2` | Multi-step local repair with reusable machine state, artifact contracts, or 2+ handoffs | Quality preserved first, time optimized second. Token gains are workload-sensitive and should not be promised for every task. | token `+74.37%`, time `+70.96%`, quality `+15.00` | token `+3.43%`, time `+47.28%`, quality `+0.00` |
-| `t3` | Loop-heavy work with checkpoint, resume, replay, or repeated verification | Quality preserved first, time optimized second. Aggregate token gains are usually smaller than `t1` and can disappear or reverse on individual tasks. | token `+25.48%`, time `+58.51%`, quality `+0.00` | token `+10.84%`, time `+59.11%`, quality `+3.00` |
+| `t0` | Single-surface work with no real handoff, no shared machine state, and no loop | Exactness-first tier. Small aggregate gains are possible, but results stay noise-sensitive on tiny fixed-format tasks. | token `-46.73%`, time `+31.89%`, quality `+5.00` | token `+7.21%`, time `+3.38%`, quality `+0.00` |
+| `t1` | Exactly one deliberate handoff or one child-agent review pass | Strongest low-risk repeat aggregate win. This is still the clearest release-facing token-optimization tier. | token `+76.08%`, time `+79.52%`, quality `+0.00` | token `+40.79%`, time `+66.79%`, quality `+0.00` |
+| `t2` | Multi-step local repair with reusable machine state, artifact contracts, or 2+ handoffs | Strong fit when explicit artifact contracts and validators exist. Time stays first, but token savings are now also strong on the refreshed public general-task run. | token `+74.37%`, time `+70.96%`, quality `+15.00` | token `+48.26%`, time `+61.36%`, quality `+0.00` |
+| `t3` | Loop-heavy work with checkpoint, resume, replay, or repeated verification | Quality preserved first, time optimized second. Aggregate token gains remain smaller and less stable than `t1` or the current `t2` refresh. | token `+25.48%`, time `+58.51%`, quality `+0.00` | token `+7.84%`, time `+39.15%`, quality `+3.00` |
 
-These figures are tier aggregates from two heavy suites, not a guarantee that every task inside the tier will show the same token direction. In release messaging, `t1` is the only tier that currently supports a repeat large token-win claim, `t2` and `t3` should be described as time-first tiers with possible but non-guaranteed token upside, and `t0` should be described as exactness-first rather than token-first.
+These figures are tier aggregates from two heavy suites, not a guarantee that every task inside the tier will show the same token direction. In release messaging, `t1` remains the lowest-risk large token-and-time win, `t2` can now support a stronger efficiency claim when artifact contracts are explicit, `t3` should still be described as time-first with smaller token upside, and `t0` should be described as exactness-first rather than token-first.
 
 ## Known Limitations
 
@@ -123,12 +123,14 @@ These figures are tier aggregates from two heavy suites, not a guarantee that ev
 - [benchmark/summary.zh-CN.md](benchmark/summary.zh-CN.md): latest Chinese benchmark index and file map
 - [benchmark/hybrid_general_task_public_report_en_latest.md](benchmark/hybrid_general_task_public_report_en_latest.md): latest English public heavy report
 - [benchmark/hybrid_general_task_public_report_zh_latest.md](benchmark/hybrid_general_task_public_report_zh_latest.md): latest Chinese public heavy report
+- [docs/release_update_v0.3.4.md](docs/release_update_v0.3.4.md): `v0.3.4` release update notes
+- [docs/release_update_v0.3.4.zh-CN.md](docs/release_update_v0.3.4.zh-CN.md): Chinese `v0.3.4` release update notes
 - [docs/release_validation_latest.zh-CN.md](docs/release_validation_latest.zh-CN.md): latest Chinese release-validation report
 - [docs/release_validation_latest.md](docs/release_validation_latest.md): canonical latest pre-release heavy report
 - [docs/agent_compatibility.md](docs/agent_compatibility.md): host-compatibility and default-installation boundary
 - [docs/agent_compatibility.zh-CN.md](docs/agent_compatibility.zh-CN.md): Chinese host-compatibility guide
-- [docs/launch_announcement.md](docs/launch_announcement.md): launch announcement copy pack
-- [docs/launch_announcement.zh-CN.md](docs/launch_announcement.zh-CN.md): Chinese launch announcement copy pack
+- [docs/launch_announcement.md](docs/launch_announcement.md): release update copy pack
+- [docs/launch_announcement.zh-CN.md](docs/launch_announcement.zh-CN.md): Chinese release update copy pack
 - [STRATEGY.md](STRATEGY.md): tier triggers, bundle caps, bridge modes, and override rules
 - [STRATEGY.zh-CN.md](STRATEGY.zh-CN.md): Chinese tier strategy
 - [RUNTIME_GUIDE.md](RUNTIME_GUIDE.md): runtime hookup and promotion rules

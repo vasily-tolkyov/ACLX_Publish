@@ -745,7 +745,7 @@ class PolicyAndSessionTests(unittest.TestCase):
             self.assertNotIn("Artifacts:", payload)
             self.assertIn("Artifact rule:", payload)
             self.assertIn(
-                "Execute once: read named files, patch, create required artifacts from the named spec, run only Validate (`check files` = existence only), then reply with `Changed paths` and `Executed validator result` only. No progress messages or rereads of written artifacts.",
+                "Execute once: before the first validator run, complete one edit batch for source changes and every `Must write` target, creating any missing required artifacts directly from the named spec in that same batch. Do not split source fixes and artifact writes across multiple edit passes. Apply `Artifact defaults` in that first write. Then run only Validate (`check files` = existence only) and reply with `Changed paths` and `Executed validator result` only; use plain relative paths and one short line per item, with no links, bullets, or extra prose. Re-edit only if Validate fails. No progress messages or rereads of written artifacts unless Validate fails.",
                 payload,
             )
             self.assertIn(
@@ -793,7 +793,7 @@ class PolicyAndSessionTests(unittest.TestCase):
             self.assertIn("Write requirements: review notes keep Risk and Evidence sections", payload)
             self.assertIn("Done when: required artifact files exist", payload)
             self.assertIn(
-                "Execute once: read named files, patch, create required artifacts from the named spec, run only Validate (`check files` = existence only), then reply with `Changed paths` and `Executed validator result` only. No progress messages or rereads of written artifacts.",
+                "Execute once: before the first validator run, complete one edit batch for source changes and every `Must write` target, creating any missing required artifacts directly from the named spec in that same batch. Do not split source fixes and artifact writes across multiple edit passes. Apply `Artifact defaults` in that first write. Then run only Validate (`check files` = existence only) and reply with `Changed paths` and `Executed validator result` only; use plain relative paths and one short line per item, with no links, bullets, or extra prose. Re-edit only if Validate fails. No progress messages or rereads of written artifacts unless Validate fails.",
                 payload,
             )
             self.assertNotIn("check acceptance", payload)
@@ -857,6 +857,10 @@ class PolicyAndSessionTests(unittest.TestCase):
                 payload,
             )
             self.assertIn(
+                "Artifact defaults: heading-only notes -> one short line per heading",
+                payload,
+            )
+            self.assertIn(
                 "Write requirements: artifacts/shared_state.json keeps the required handoff keys",
                 payload,
             )
@@ -865,7 +869,7 @@ class PolicyAndSessionTests(unittest.TestCase):
                 payload,
             )
             self.assertIn(
-                "Execute once: read named files, patch, create required artifacts from the named spec, run only Validate (`check files` = existence only), then reply with `Changed paths` and `Executed validator result` only. No progress messages or rereads of written artifacts.",
+                "Execute once: before the first validator run, complete one edit batch for source changes and every `Must write` target, creating any missing required artifacts directly from the named spec in that same batch. Do not split source fixes and artifact writes across multiple edit passes. Apply `Artifact defaults` in that first write. Then run only Validate (`check files` = existence only) and reply with `Changed paths` and `Executed validator result` only; use plain relative paths and one short line per item, with no links, bullets, or extra prose. Re-edit only if Validate fails. No progress messages or rereads of written artifacts unless Validate fails.",
                 payload,
             )
             self.assertNotIn("check wording: reports/repair_notes.md", payload)
@@ -907,6 +911,10 @@ class PolicyAndSessionTests(unittest.TestCase):
             )
             self.assertIn(
                 "Artifact spec: artifacts/shared_state.json -> keys status, owner, validated_tests; reports/repair_notes.md -> headings Risk, Evidence",
+                payload,
+            )
+            self.assertIn(
+                "Artifact defaults: key-only JSON -> smallest valid object with short non-empty values; validated_tests -> prefill one validator command in the first write; heading-only notes -> one short line per heading",
                 payload,
             )
             self.assertNotIn(
@@ -1137,7 +1145,7 @@ class PolicyAndSessionTests(unittest.TestCase):
                 payload,
             )
             self.assertIn(
-                "Validate: check wording: docs/release_signoff_handbook.md; inspect docs: reports/signoff_checkpoint.md",
+                "Validate: check wording: docs/release_signoff_handbook.md; check headings: reports/signoff_checkpoint.md",
                 payload,
             )
             self.assertNotIn("Validate: check wording; inspect docs", payload)

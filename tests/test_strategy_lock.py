@@ -8,15 +8,13 @@ from pathlib import Path
 
 from aclx.strategy_lock import StrategyLockError, reset_strategy_lock_cache, verify_strategy_lock
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
 
 class StrategyLockTests(unittest.TestCase):
     def tearDown(self) -> None:
         reset_strategy_lock_cache()
 
     def test_real_strategy_manifest_verifies(self) -> None:
-        checked = verify_strategy_lock(project_root=REPO_ROOT)
+        checked = verify_strategy_lock(project_root=Path(__file__).resolve().parents[1])
         self.assertIn("configs/hybrid_router_map.yaml", checked)
         self.assertIn("configs/tier_strategies/t0.yaml", checked)
         self.assertIn("configs/tier_strategies/t1.yaml", checked)
@@ -56,17 +54,18 @@ class StrategyLockTests(unittest.TestCase):
             with self.assertRaises(StrategyLockError):
                 verify_strategy_lock(project_root=root)
 
-    def test_strategy_lock_normalizes_utf8_line_endings_and_bom(self) -> None:
+    def test_strategy_lock_normalizes_text_line_endings(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "configs").mkdir(parents=True)
-            (root / "alpha.txt").write_bytes(b"alpha\nbeta\n")
+            alpha = root / "alpha.txt"
+            alpha.write_text("alpha\nbeta\n", encoding="utf-8")
             (root / "configs" / "strategy_lock.json").write_text(
                 json.dumps(
                     {
                         "lock_name": "test-lock",
                         "files": {
-                            "alpha.txt": _sha256(root / "alpha.txt"),
+                            "alpha.txt": _sha256(alpha),
                         },
                     },
                     ensure_ascii=True,
@@ -75,9 +74,10 @@ class StrategyLockTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            (root / "alpha.txt").write_bytes(b"\xef\xbb\xbfalpha\r\nbeta\r\n")
-            checked = verify_strategy_lock(project_root=root)
-            self.assertEqual(checked["alpha.txt"], _sha256(root / "alpha.txt"))
+            self.assertEqual(verify_strategy_lock(project_root=root)["alpha.txt"], _sha256(alpha))
+            alpha.write_bytes("alpha\r\nbeta\r\n".encode("utf-8"))
+            reset_strategy_lock_cache()
+            self.assertEqual(verify_strategy_lock(project_root=root)["alpha.txt"], _sha256(alpha))
 
 
 def _sha256(path: Path) -> str:

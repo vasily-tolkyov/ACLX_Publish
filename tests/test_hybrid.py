@@ -19,13 +19,6 @@ from aclx.contract_normalizer import normalize_task_to_contract
 from aclx.metrics import model_token_count
 from aclx.supervisor import ACLXSupervisor
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT_STR = str(REPO_ROOT)
-SUPERVISOR_PATH = str(REPO_ROOT / "src" / "aclx" / "supervisor.py")
-HYBRID_PATH = str(REPO_ROOT / "src" / "aclx" / "hybrid.py")
-RUNTIME_SHARED_STATE = str(REPO_ROOT / "runtime" / "shared_state.aclx")
-RUNTIME_SHARED_STATE_POSIX = RUNTIME_SHARED_STATE.replace("\\", "/")
-
 
 class HybridPromptTests(unittest.TestCase):
     def tearDown(self) -> None:
@@ -41,8 +34,8 @@ class HybridPromptTests(unittest.TestCase):
                 task="Review the ACL-X supervisor for prompt waste and timeout risk.",
                 profile="review",
                 lane="prompt-review",
-                cwd=REPO_ROOT_STR,
-                scope_in=[SUPERVISOR_PATH],
+                cwd=r"D:\codex\acl_x",
+                scope_in=[r"D:\codex\acl_x\src\aclx\supervisor.py"],
                 scope_out=["no edits"],
                 stop_conditions=["missing evidence"],
             )
@@ -78,13 +71,13 @@ class HybridPromptTests(unittest.TestCase):
         supervisor = ACLXSupervisor()
         full_payload = supervisor.build_payload(
             "Review the ACL-X supervisor for prompt waste and timeout risk.",
-            cwd=REPO_ROOT_STR,
+            cwd=r"D:\codex\acl_x",
             style="full",
             profile="review",
         )
         hybrid_payload = supervisor.build_payload(
             "Review the ACL-X supervisor for prompt waste and timeout risk.",
-            cwd=REPO_ROOT_STR,
+            cwd=r"D:\codex\acl_x",
             style="adaptive",
             profile="review",
         )
@@ -229,12 +222,12 @@ class HybridPromptTests(unittest.TestCase):
                 profile="implement",
                 lane="shared-state",
                 tier="t2",
-                cwd=REPO_ROOT_STR,
-                outputs=[RUNTIME_SHARED_STATE],
+                cwd=r"D:\codex\acl_x",
+                outputs=[r"D:\codex\acl_x\runtime\shared_state.aclx"],
                 constraints=["review notes keep Risk and Evidence sections"],
                 next_actions=["write shared state", "run tests"],
                 stop_conditions=["missing machine artifact"],
-                scope_in=[HYBRID_PATH],
+                scope_in=[r"D:\codex\acl_x\src\aclx\hybrid.py"],
                 shared_state=True,
                 real_handoff_started=True,
             )
@@ -242,15 +235,14 @@ class HybridPromptTests(unittest.TestCase):
         self.assertEqual(payload.tier, "t2")
         self.assertEqual(payload.bridge_mode, "session")
         self.assertIn("Machine contract:", payload.prompt)
-        self.assertIn("Must write:", payload.prompt)
-        self.assertIn("/runtime/shared_state", payload.prompt.replace("\\", "/"))
+        self.assertIn("Must write: runtime/shared_state.aclx", payload.prompt)
         self.assertIn("Done when: review notes keep Risk and Evidence sections", payload.prompt)
         self.assertNotIn("cwd=", payload.aclx_bundle)
         self.assertNotIn("t=nl", payload.aclx_bundle)
         self.assertNotIn("p=implement", payload.aclx_bundle)
         self.assertNotIn("nx=", payload.aclx_bundle)
         self.assertIn("in=src/aclx/hybrid.py", payload.aclx_bundle)
-        self.assertNotIn(f"out={RUNTIME_SHARED_STATE_POSIX}", payload.aclx_bundle)
+        self.assertNotIn("out=D:/codex/acl_x/runtime/shared_state.aclx", payload.aclx_bundle)
         self.assertNotIn("d=", payload.aclx_bundle)
 
     def test_t3_resume_prompt_includes_preserve_artifacts_and_handle(self) -> None:
@@ -380,18 +372,184 @@ class HybridPromptTests(unittest.TestCase):
             )
         )
         self.assertIn("Single handoff contract:", payload.prompt)
-        self.assertIn("One delegated pass only. Keep setup minimal.", payload.prompt)
-        self.assertIn("Skip router/config/help/package internals unless the task explicitly needs capability or package facts.", payload.prompt)
-        self.assertIn("Must write: reports/review.md", payload.prompt)
-        self.assertIn("Done when: reports/review.md keeps Decision and Evidence headings", payload.prompt)
-        self.assertIn("Next: delegate once; write review report", payload.prompt)
         self.assertIn(
-            "If delegation is blocked by policy or environment, continue locally from inspected evidence.",
+            "One reviewer pass only. Use it only if direct inspection still leaves a material ambiguity or missing fact for the required result, and that reviewer can inspect the same named inputs directly in the current workspace without extra setup or policy changes.",
             payload.prompt,
         )
+        self.assertIn(
+            "Do not use the reviewer pass to reconfirm a conclusion already clear from direct inspection.",
+            payload.prompt,
+        )
+        self.assertIn(
+            "Do not read skill/router docs or probe commands to discover delegation.",
+            payload.prompt,
+        )
+        self.assertNotIn(
+            "One delegated pass only. Use it only if an exposed reviewer can inspect the same named inputs directly in the current workspace with its own tools.",
+            payload.prompt,
+        )
+        self.assertIn("Must write: reports/review.md", payload.prompt)
+        self.assertIn("Done when: reports/review.md keeps Decision and Evidence headings", payload.prompt)
+        self.assertNotIn(
+            "Done when: reports/review.md keeps Decision and Evidence headings; reports/review.md names src/review_target.py; delegate exactly once",
+            payload.prompt,
+        )
+        self.assertIn("Next: write review report", payload.prompt)
+        self.assertNotIn("Next: delegate once; write review report", payload.prompt)
+        self.assertIn("If the required conclusion is already clear from direct inspection", payload.prompt)
+        self.assertIn("or no such reviewer is immediately readable", payload.prompt)
+        self.assertIn("use named inputs as working evidence", payload.prompt)
+        self.assertIn("create required outputs directly", payload.prompt)
+        self.assertIn("skip output-path probes", payload.prompt)
+        self.assertIn("artifact rereads", payload.prompt)
+        self.assertIn("extra line-number extraction", payload.prompt)
+        self.assertIn("workspace listings", payload.prompt)
+        self.assertIn("code excerpts unless explicitly required or a fact remains ambiguous", payload.prompt)
         self.assertIn("out=reports/review.md", payload.aclx_bundle)
         self.assertIn("d=reports/review.md_keeps_Decision_and_Evidence_headings", payload.aclx_bundle)
+        self.assertIn("nx=write_review_report", payload.aclx_bundle)
+        self.assertNotIn("delegate_once", payload.aclx_bundle)
+        self.assertNotIn("p=review", payload.aclx_bundle)
         self.assertIn("stop=missing_review_report", payload.aclx_bundle)
+
+    def test_t1_prompt_keeps_generic_fallback_for_non_review_artifact(self) -> None:
+        payload = ACLXHybridPromptBuilder().build_prompt(
+            HybridTaskSpec(
+                task="Inspect the target and delegate exactly once.",
+                tier="t1",
+                outputs=["artifacts/handoff.json"],
+                constraints=[
+                    "artifacts/handoff.json contains summary and risk keys",
+                    "artifacts/handoff.json names src/handoff_target.py",
+                ],
+                next_actions=["delegate once", "write handoff artifact"],
+                stop_conditions=["missing handoff artifact"],
+                shared_state=True,
+                real_handoff_started=True,
+            )
+        )
+        self.assertIn("Must write: artifacts/handoff.json", payload.prompt)
+        self.assertIn("Next: write handoff artifact", payload.prompt)
+        self.assertNotIn("Next: delegate once; write handoff artifact", payload.prompt)
+        self.assertIn(
+            "One reviewer pass only. Use it only if direct inspection still leaves a material ambiguity or missing fact for the required result, and that reviewer can inspect the same named inputs directly in the current workspace without extra setup or policy changes.",
+            payload.prompt,
+        )
+        self.assertIn(
+            "Do not use the reviewer pass to reconfirm a conclusion already clear from direct inspection.",
+            payload.prompt,
+        )
+        self.assertIn(
+            "Do not read skill/router docs or probe commands to discover delegation.",
+            payload.prompt,
+        )
+        self.assertNotIn(
+            "One delegated pass only. Use it only if an exposed reviewer can inspect the same named inputs directly in the current workspace with its own tools.",
+            payload.prompt,
+        )
+        self.assertNotIn(
+            "Done when: artifacts/handoff.json contains summary and risk keys; artifacts/handoff.json names src/handoff_target.py; delegate exactly once",
+            payload.prompt,
+        )
+        self.assertIn("If the required conclusion is already clear from direct inspection", payload.prompt)
+        self.assertIn("or no such reviewer is immediately readable", payload.prompt)
+        self.assertIn("use named inputs as working evidence", payload.prompt)
+        self.assertIn("create required outputs directly", payload.prompt)
+        self.assertIn("skip output-path probes", payload.prompt)
+        self.assertIn("artifact rereads", payload.prompt)
+        self.assertIn("extra line-number extraction", payload.prompt)
+        self.assertIn("workspace listings", payload.prompt)
+        self.assertIn("code excerpts unless explicitly required or a fact remains ambiguous", payload.prompt)
+        self.assertIn("out=artifacts/handoff.json", payload.aclx_bundle)
+        self.assertIn("nx=write_handoff_artifact", payload.aclx_bundle)
+        self.assertNotIn("delegate_once", payload.aclx_bundle)
+        self.assertNotIn("p=default", payload.aclx_bundle)
+        self.assertIn("stop=missing_handoff_artifact", payload.aclx_bundle)
+
+    def test_t1_prompt_keeps_visible_next_when_next_step_is_not_redundant_write(self) -> None:
+        payload = ACLXHybridPromptBuilder().build_prompt(
+            HybridTaskSpec(
+                task="Inspect the target and delegate exactly once.",
+                tier="t1",
+                outputs=["reports/review.md"],
+                constraints=["reports/review.md keeps Decision and Evidence headings"],
+                next_actions=["delegate once", "run validator"],
+                shared_state=True,
+                real_handoff_started=True,
+            )
+        )
+        self.assertIn("Must write: reports/review.md", payload.prompt)
+        self.assertIn("Next: run validator", payload.prompt)
+        self.assertIn("nx=run_validator", payload.aclx_bundle)
+
+    def test_t1_done_when_drops_redundant_path_citation_when_task_names_source(self) -> None:
+        payload = ACLXHybridPromptBuilder().build_prompt(
+            HybridTaskSpec(
+                task="Inspect `src/review_target.py` and delegate exactly once.",
+                tier="t1",
+                outputs=["reports/review.md"],
+                constraints=[
+                    "reports/review.md keeps Decision and Evidence headings",
+                    "reports/review.md names src/review_target.py",
+                ],
+                next_actions=["delegate once", "write review report"],
+                shared_state=True,
+                real_handoff_started=True,
+            )
+        )
+        self.assertIn("Done when: reports/review.md keeps Decision and Evidence headings", payload.prompt)
+        self.assertNotIn("reports/review.md names src/review_target.py", payload.prompt)
+
+    def test_t1_done_when_keeps_path_citation_when_task_body_does_not_name_source(self) -> None:
+        payload = ACLXHybridPromptBuilder().build_prompt(
+            HybridTaskSpec(
+                task="Inspect the target and delegate exactly once.",
+                tier="t1",
+                outputs=["reports/review.md"],
+                constraints=[
+                    "reports/review.md keeps Decision and Evidence headings",
+                    "reports/review.md names src/review_target.py",
+                ],
+                next_actions=["delegate once", "write review report"],
+                shared_state=True,
+                real_handoff_started=True,
+            )
+        )
+        self.assertIn(
+            "Done when: reports/review.md keeps Decision and Evidence headings; reports/review.md names src/review_target.py",
+            payload.prompt,
+        )
+
+    def test_t1_done_when_keeps_path_citation_for_prefix_collision(self) -> None:
+        payload = ACLXHybridPromptBuilder().build_prompt(
+            HybridTaskSpec(
+                task="Inspect `src/review_target.py.bak` and delegate exactly once.",
+                tier="t1",
+                outputs=["reports/review.md"],
+                constraints=[
+                    "reports/review.md keeps Decision and Evidence headings",
+                    "reports/review.md names src/review_target.py",
+                ],
+                next_actions=["delegate once", "write review report"],
+                shared_state=True,
+                real_handoff_started=True,
+            )
+        )
+        self.assertIn("reports/review.md names src/review_target.py", payload.prompt)
+
+    def test_t1_done_when_keeps_only_path_citation_when_it_would_otherwise_go_empty(self) -> None:
+        payload = ACLXHybridPromptBuilder().build_prompt(
+            HybridTaskSpec(
+                task="Inspect `src/review_target.py` and delegate exactly once.",
+                tier="t1",
+                outputs=["reports/review.md"],
+                constraints=["reports/review.md names src/review_target.py"],
+                next_actions=["delegate once", "write review report"],
+                shared_state=True,
+                real_handoff_started=True,
+            )
+        )
+        self.assertIn("Done when: reports/review.md names src/review_target.py", payload.prompt)
 
     def test_split_tier_files_load_independently(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

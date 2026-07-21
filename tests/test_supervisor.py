@@ -6,18 +6,23 @@ import unittest
 from pathlib import Path
 
 from aclx.contract import RuntimeNeeds, TaskContract
-from aclx.supervisor import ACLXSupervisor, _compact_runtime_task
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE = str(REPO_ROOT)
+from aclx.supervisor import ACLXSupervisor, T0_MINIMAL_AGENTS, _compact_runtime_task, _compact_t1_task
 
 
 class SupervisorTests(unittest.TestCase):
     def setUp(self) -> None:
         self.supervisor = ACLXSupervisor()
 
+    def test_t0_minimal_agents_matches_restored_t0_contract(self) -> None:
+        self.assertEqual(
+            T0_MINIMAL_AGENTS,
+            "# T0\n"
+            "One-shot NL only. No ACL-X bundles, runtime files, skills, or handoffs. "
+            "Keep exact shape or literal facts only when the task explicitly requires them.\n",
+        )
+
     def test_build_payload_contains_compact_hybrid_contract_by_default(self) -> None:
-        payload = self.supervisor.build_payload("Summarize the current task briefly.", cwd=WORKSPACE)
+        payload = self.supervisor.build_payload("Summarize the current task briefly.", cwd=r"D:\codex\acl_x")
         self.assertEqual(payload.aclx_bundle, "")
         self.assertEqual(payload.codex_prompt, "Summarize the current task briefly.")
         self.assertEqual(payload.delegation_json, "{}")
@@ -28,7 +33,7 @@ class SupervisorTests(unittest.TestCase):
     def test_adaptive_payload_keeps_meta_skill_port_in_t0(self) -> None:
         payload = self.supervisor.build_payload(
             "Port the verification-triad-router skill into Codex with default hybrid semantics.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
         )
         self.assertEqual(payload.tier, "t0")
         self.assertEqual(payload.aclx_bundle, "")
@@ -38,7 +43,7 @@ class SupervisorTests(unittest.TestCase):
     def test_single_output_task_does_not_promote_to_session_mode(self) -> None:
         payload = self.supervisor.build_payload(
             "Write `reports/summary.md`.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             outputs=["reports/summary.md"],
             constraints=["reports/summary.md exists"],
         )
@@ -63,7 +68,7 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(payload.bridge_mode, "none")
         self.assertEqual(payload.codex_prompt, "Compare `data/a.json` and `data/b.json`, then write `reports/out.json`.")
 
-    def test_t0_exact_output_task_uses_selective_guards_and_low_reasoning(self) -> None:
+    def test_t0_strong_exact_output_task_skips_redundant_guard_and_omits_reasoning_override(self) -> None:
         task = (
             "Read `docs/release_notes.txt`.\n"
             "Return exactly 3 non-empty lines:\n"
@@ -72,20 +77,46 @@ class SupervisorTests(unittest.TestCase):
             "Evidence: docs/release_notes.txt; mention strategy lock and adaptive runtime.\n"
             "Do not edit files."
         )
-        payload = self.supervisor.build_payload(task, cwd=WORKSPACE)
+        payload = self.supervisor.build_payload(task, cwd=r"D:\codex\acl_x")
+        self.assertEqual(payload.tier, "t0")
+        self.assertEqual(payload.reasoning_effort, "")
+        self.assertEqual(payload.codex_prompt, task)
+
+    def test_t0_weaker_exact_output_task_keeps_short_guard_and_low_reasoning(self) -> None:
+        task = (
+            "Read `docs/release_notes.txt`.\n"
+            "Return exactly 2 non-empty lines.\n"
+            "Mention strategy lock and adaptive runtime.\n"
+            "Do not edit files."
+        )
+        payload = self.supervisor.build_payload(task, cwd=r"D:\codex\acl_x")
         self.assertEqual(payload.tier, "t0")
         self.assertEqual(payload.reasoning_effort, "low")
-        self.assertTrue(
-            payload.codex_prompt.startswith(
-                "Keep the required output shape and explicit literal facts verbatim.\n"
-            )
+        self.assertEqual(
+            payload.codex_prompt,
+            "Keep output shape exact; keep literal facts verbatim.\n" + task,
         )
-        self.assertTrue(payload.codex_prompt.endswith(task))
+
+    def test_t0_structured_literal_task_without_exact_output_keeps_short_guard(self) -> None:
+        task = (
+            "Read `docs/release_notes.txt`.\n"
+            "Tier: t0\n"
+            "Decision: <one sentence>\n"
+            "Evidence: docs/release_notes.txt; mention strategy lock and adaptive runtime.\n"
+            "Do not edit files."
+        )
+        payload = self.supervisor.build_payload(task, cwd=r"D:\codex\acl_x")
+        self.assertEqual(payload.tier, "t0")
+        self.assertEqual(payload.reasoning_effort, "low")
+        self.assertEqual(
+            payload.codex_prompt,
+            "Keep output shape exact; keep literal facts verbatim.\n" + task,
+        )
 
     def test_adaptive_payload_promotes_explicit_runtime_loop_to_t3(self) -> None:
         payload = self.supervisor.build_payload(
             "Run the verification loop, checkpoint and resume until the review is clean.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             outputs=[r"runtime\checkpoints\checkpoint_01.aclx", r"target_skill\SKILL.md"],
             constraints=["preserve generator critic refiner roles", "keep strict mode wording"],
             stop_conditions=["scope drift"],
@@ -113,7 +144,7 @@ class SupervisorTests(unittest.TestCase):
         )
         payload = self.supervisor.build_payload(
             task,
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             task_shape="loop",
             outputs=[r"runtime\checkpoints\checkpoint_01.aclx", r"target_skill\SKILL.md"],
             constraints=["preserve generator critic refiner roles", "keep strict mode wording"],
@@ -198,7 +229,7 @@ class SupervisorTests(unittest.TestCase):
             self.assertIn("Compiled contract is authoritative", payload.codex_prompt)
             self.assertIn("reopen TASK.md only if blocked or Validate fails", payload.codex_prompt)
             self.assertIn(
-                "Validate: check wording: docs/release_signoff_handbook.md; inspect docs: reports/signoff_checkpoint.md",
+                "Validate: check wording: docs/release_signoff_handbook.md; check headings: reports/signoff_checkpoint.md",
                 payload.codex_prompt,
             )
             self.assertNotIn("Validate: check wording; inspect docs", payload.codex_prompt)
@@ -285,7 +316,7 @@ class SupervisorTests(unittest.TestCase):
             self.assertEqual(payload.reasoning_effort, "low")
 
     def test_full_style_preserves_debug_heavy_prompt(self) -> None:
-        payload = self.supervisor.build_payload("Create a compact ACL-X handoff.", cwd=WORKSPACE, style="full")
+        payload = self.supervisor.build_payload("Create a compact ACL-X handoff.", cwd=r"D:\codex\acl_x", style="full")
         self.assertIn("$aclx-runtime", payload.codex_prompt)
         self.assertIn("$acl-x-protocol", payload.codex_prompt)
         self.assertIn("Avoid unnecessary shell commands.", payload.codex_prompt)
@@ -294,7 +325,7 @@ class SupervisorTests(unittest.TestCase):
     def test_hybrid_style_is_an_adaptive_alias(self) -> None:
         adaptive = self.supervisor.build_payload(
             "Coordinate reusable shared state across the next phase.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             outputs=[r"runtime\shared_state.aclx"],
             constraints=["write the shared state before review"],
             next_actions=["write shared state", "review output"],
@@ -302,7 +333,7 @@ class SupervisorTests(unittest.TestCase):
         )
         hybrid = self.supervisor.build_payload(
             "Coordinate reusable shared state across the next phase.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             style="hybrid",
             outputs=[r"runtime\shared_state.aclx"],
             constraints=["write the shared state before review"],
@@ -317,7 +348,7 @@ class SupervisorTests(unittest.TestCase):
     def test_adaptive_t2_payload_uses_session_wrapped_prompt(self) -> None:
         payload = self.supervisor.build_payload(
             "Coordinate reusable shared state across the next phase.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             outputs=[r"runtime\shared_state.aclx", r"reports\review_notes.md"],
             constraints=["review notes keep Risk and Evidence sections"],
             next_actions=["write shared state", "run tests"],
@@ -332,7 +363,7 @@ class SupervisorTests(unittest.TestCase):
         self.assertIn("Done when:", payload.codex_prompt)
         self.assertIn("Artifact rule:", payload.codex_prompt)
         self.assertIn(
-            "Execute once: read named files, patch, create required artifacts from the named spec, run only Validate (`check files` = existence only), then reply with `Changed paths` and `Executed validator result` only. No progress messages or rereads of written artifacts.",
+            "Execute once: before the first validator run, complete one edit batch for source changes and every `Must write` target, creating any missing required artifacts directly from the named spec in that same batch. Do not split source fixes and artifact writes across multiple edit passes. Apply `Artifact defaults` in that first write. Then run only Validate (`check files` = existence only) and reply with `Changed paths` and `Executed validator result` only; use plain relative paths and one short line per item, with no links, bullets, or extra prose. Re-edit only if Validate fails. No progress messages or rereads of written artifacts unless Validate fails.",
             payload.codex_prompt,
         )
         self.assertIn(
@@ -354,7 +385,7 @@ class SupervisorTests(unittest.TestCase):
         )
         payload = self.supervisor.build_payload(
             "Coordinate reusable shared state across the next phase.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             contract=contract,
         )
         self.assertEqual(payload.tier, "t2")
@@ -373,7 +404,7 @@ class SupervisorTests(unittest.TestCase):
         )
         payload = self.supervisor.build_payload(
             task,
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             task_shape="shared_state",
             expected_handoffs=2,
             expected_rounds=2,
@@ -397,7 +428,7 @@ class SupervisorTests(unittest.TestCase):
     def test_adaptive_t1_payload_uses_low_reasoning_and_single_handoff_contract(self) -> None:
         payload = self.supervisor.build_payload(
             "Inspect `src/review_target.py`, delegate exactly once, and write `reports/review.md`.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
             profile="review",
             task_shape="delegated_once",
             expected_handoffs=1,
@@ -416,23 +447,142 @@ class SupervisorTests(unittest.TestCase):
         self.assertEqual(payload.tier, "t1")
         self.assertEqual(payload.bridge_mode, "bundle")
         self.assertEqual(payload.reasoning_effort, "low")
+        self.assertNotIn("delegate exactly once, and write `reports/review.md`", payload.codex_prompt)
         self.assertIn("Single handoff contract:", payload.codex_prompt)
         self.assertIn("Must write: reports/review.md", payload.codex_prompt)
         self.assertIn("Done when: reports/review.md keeps Decision and Evidence headings", payload.codex_prompt)
-        self.assertIn("Next: delegate once; write review report", payload.codex_prompt)
+        self.assertNotIn("reports/review.md names src/review_target.py", payload.codex_prompt)
+        self.assertNotIn(
+            "Done when: reports/review.md keeps Decision and Evidence headings; reports/review.md names src/review_target.py; delegate exactly once",
+            payload.codex_prompt,
+        )
+        self.assertIn("Next: write review report", payload.codex_prompt)
+        self.assertNotIn("Next: delegate once; write review report", payload.codex_prompt)
         self.assertIn(
-            "Skip router/config/help/package internals unless the task explicitly needs capability or package facts.",
+            "One reviewer pass only. Use it only if direct inspection still leaves a material ambiguity or missing fact for the required result, and that reviewer can inspect the same named inputs directly in the current workspace without extra setup or policy changes.",
             payload.codex_prompt,
         )
         self.assertIn(
-            "If delegation is blocked by policy or environment, continue locally from inspected evidence.",
+            "Do not use the reviewer pass to reconfirm a conclusion already clear from direct inspection.",
             payload.codex_prompt,
+        )
+        self.assertIn(
+            "Do not read skill/router docs or probe commands to discover delegation.",
+            payload.codex_prompt,
+        )
+        self.assertNotIn(
+            "One delegated pass only. Use it only if an exposed reviewer can inspect the same named inputs directly in the current workspace with its own tools.",
+            payload.codex_prompt,
+        )
+        self.assertIn("If the required conclusion is already clear from direct inspection", payload.codex_prompt)
+        self.assertIn("or no such reviewer is immediately readable", payload.codex_prompt)
+        self.assertIn("use named inputs as working evidence", payload.codex_prompt)
+        self.assertIn("create required outputs directly", payload.codex_prompt)
+        self.assertIn("skip output-path probes", payload.codex_prompt)
+        self.assertIn("artifact rereads", payload.codex_prompt)
+        self.assertIn("extra line-number extraction", payload.codex_prompt)
+        self.assertIn("workspace listings", payload.codex_prompt)
+        self.assertIn("code excerpts unless explicitly required or a fact remains ambiguous", payload.codex_prompt)
+        self.assertNotIn("p=review", payload.aclx_bundle)
+        self.assertIn("out=reports/review.md", payload.aclx_bundle)
+        self.assertNotIn("named report directly", payload.codex_prompt)
+
+    def test_adaptive_t1_payload_keeps_generic_fallback_for_non_review_artifact(self) -> None:
+        payload = self.supervisor.build_payload(
+            "Inspect `src/handoff_target.py`, delegate exactly once, and write `artifacts/handoff.json`.",
+            cwd=r"D:\codex\acl_x",
+            profile="default",
+            task_shape="delegated_once",
+            expected_handoffs=1,
+            expected_rounds=1,
+            child_agents=1,
+            shared_state=True,
+            outputs=["artifacts/handoff.json"],
+            constraints=[
+                "artifacts/handoff.json contains summary and risk keys",
+                "artifacts/handoff.json names src/handoff_target.py",
+            ],
+            stop_conditions=["missing handoff artifact"],
+            next_actions=["delegate once", "write handoff artifact"],
+        )
+        self.assertEqual(payload.tier, "t1")
+        self.assertEqual(payload.bridge_mode, "bundle")
+        self.assertEqual(payload.reasoning_effort, "low")
+        self.assertNotIn("delegate exactly once, and write `artifacts/handoff.json`", payload.codex_prompt)
+        self.assertIn("Must write: artifacts/handoff.json", payload.codex_prompt)
+        self.assertIn("Next: write handoff artifact", payload.codex_prompt)
+        self.assertNotIn("Next: delegate once; write handoff artifact", payload.codex_prompt)
+        self.assertIn(
+            "One reviewer pass only. Use it only if direct inspection still leaves a material ambiguity or missing fact for the required result, and that reviewer can inspect the same named inputs directly in the current workspace without extra setup or policy changes.",
+            payload.codex_prompt,
+        )
+        self.assertIn(
+            "Do not use the reviewer pass to reconfirm a conclusion already clear from direct inspection.",
+            payload.codex_prompt,
+        )
+        self.assertIn(
+            "Do not read skill/router docs or probe commands to discover delegation.",
+            payload.codex_prompt,
+        )
+        self.assertNotIn(
+            "One delegated pass only. Use it only if an exposed reviewer can inspect the same named inputs directly in the current workspace with its own tools.",
+            payload.codex_prompt,
+        )
+        self.assertNotIn(
+            "Done when: artifacts/handoff.json contains summary and risk keys; artifacts/handoff.json names src/handoff_target.py; delegate exactly once",
+            payload.codex_prompt,
+        )
+        self.assertIn("If the required conclusion is already clear from direct inspection", payload.codex_prompt)
+        self.assertIn("or no such reviewer is immediately readable", payload.codex_prompt)
+        self.assertIn("use named inputs as working evidence", payload.codex_prompt)
+        self.assertIn("create required outputs directly", payload.codex_prompt)
+        self.assertIn("skip output-path probes", payload.codex_prompt)
+        self.assertIn("artifact rereads", payload.codex_prompt)
+        self.assertIn("extra line-number extraction", payload.codex_prompt)
+        self.assertIn("workspace listings", payload.codex_prompt)
+        self.assertIn("code excerpts unless explicitly required or a fact remains ambiguous", payload.codex_prompt)
+        self.assertNotIn("p=default", payload.aclx_bundle)
+        self.assertIn("out=artifacts/handoff.json", payload.aclx_bundle)
+
+    def test_adaptive_t1_payload_keeps_visible_next_when_next_step_is_not_redundant_write(self) -> None:
+        payload = self.supervisor.build_payload(
+            "Inspect `src/review_target.py`, delegate exactly once, and write `reports/review.md`.",
+            cwd=r"D:\codex\acl_x",
+            profile="review",
+            task_shape="delegated_once",
+            expected_handoffs=1,
+            expected_rounds=1,
+            child_agents=1,
+            shared_state=True,
+            outputs=["reports/review.md"],
+            constraints=["reports/review.md keeps Decision and Evidence headings"],
+            next_actions=["delegate once", "run validator"],
+        )
+        self.assertEqual(payload.tier, "t1")
+        self.assertIn("Must write: reports/review.md", payload.codex_prompt)
+        self.assertIn("Next: run validator", payload.codex_prompt)
+        self.assertIn("nx=run_validator", payload.aclx_bundle)
+
+    def test_compact_t1_task_merges_inspect_and_bug_line(self) -> None:
+        task = (
+            "Inspect `src/attendance_target.py`.\n"
+            "Identify the highest-risk bug with a concrete file path and explain why a zero-room input breaks the function.\n"
+            "Keep the final reply concise.\n"
+        )
+        compact = _compact_t1_task(
+            task,
+            outputs=["reports/review.md"],
+            constraints=["reports/review.md keeps Decision and Evidence headings"],
+        )
+        self.assertEqual(
+            compact,
+            "Inspect `src/attendance_target.py` and identify the highest-risk bug with a concrete file path and explain why a zero-room input breaks the function.",
         )
 
     def test_missing_t2_or_t3_contract_data_falls_back_to_nl(self) -> None:
         payload = self.supervisor.build_payload(
             "Run the verification loop, checkpoint and resume until the review is clean.",
-            cwd=WORKSPACE,
+            cwd=r"D:\codex\acl_x",
         )
         self.assertEqual(payload.tier, "t0")
         self.assertEqual(payload.bridge_mode, "none")

@@ -90,7 +90,7 @@ T2_PROMPT_HEADER = (
     "Runtime ACL-X bundle follows."
 )
 T2_EXECUTION_RULE = (
-    "Execute once: read named files, patch, create required artifacts from the named spec, run only Validate (`check files` = existence only), then reply with `Changed paths` and `Executed validator result` only. No progress messages or rereads of written artifacts."
+    "Execute once: before the first validator run, complete one edit batch for source changes and every `Must write` target, creating any missing required artifacts directly from the named spec in that same batch. Do not split source fixes and artifact writes across multiple edit passes. Apply `Artifact defaults` in that first write. Then run only Validate (`check files` = existence only) and reply with `Changed paths` and `Executed validator result` only; use plain relative paths and one short line per item, with no links, bullets, or extra prose. Re-edit only if Validate fails. No progress messages or rereads of written artifacts unless Validate fails."
 )
 T3_PROMPT_HEADER = (
     "Loop guard: contract-complete T3.\n"
@@ -1239,6 +1239,44 @@ def _t2_artifact_specs(
     return _normalize_items(specs)
 
 
+def _t2_artifact_defaults(
+    *,
+    required_artifacts: list[str],
+    artifact_specs: list[str],
+) -> list[str]:
+    spec_map: dict[str, str] = {}
+    for spec in _normalize_items(artifact_specs):
+        artifact, sep, detail = spec.partition(" -> ")
+        if not sep:
+            continue
+        key = _normalize_artifact_path_text(artifact)
+        if key:
+            spec_map[key] = detail.strip().lower()
+    has_key_only_json = False
+    has_validated_tests = False
+    has_heading_only_notes = False
+    for artifact in _normalize_items(required_artifacts):
+        key = _normalize_artifact_path_text(artifact)
+        if not key:
+            continue
+        detail = spec_map.get(key, "")
+        lowered = key.lower()
+        if lowered.endswith(".json") and detail.startswith("keys "):
+            has_key_only_json = True
+            if "validated_tests" in detail:
+                has_validated_tests = True
+        if lowered.endswith((".md", ".txt", ".rst")) and detail.startswith("headings "):
+            has_heading_only_notes = True
+    defaults: list[str] = []
+    if has_key_only_json:
+        defaults.append("key-only JSON -> smallest valid object with short non-empty values")
+    if has_validated_tests:
+        defaults.append("validated_tests -> prefill one validator command in the first write")
+    if has_heading_only_notes:
+        defaults.append("heading-only notes -> one short line per heading")
+    return defaults
+
+
 def _t2_exactness_artifact_detail(artifact: str, exactness_rules: list[str]) -> str:
     normalized_artifact = _normalize_artifact_path_text(artifact)
     artifact_name = Path(normalized_artifact).name.lower()
@@ -1858,7 +1896,7 @@ def _specialize_t3_doc_validators(items: list[str], *, required_artifacts: list[
             rewritten.append("check wording: " + "; ".join(doc_targets[:2]))
             continue
         if lowered.startswith("inspect docs: ") and checkpoint_targets:
-            rewritten.append("inspect docs: " + "; ".join(checkpoint_targets[:2]))
+            rewritten.append("check headings: " + "; ".join(checkpoint_targets[:2]))
             continue
         rewritten.append(item)
     return _normalize_items(rewritten)
@@ -1945,6 +1983,10 @@ def _render_t2_prompt(
         validator_plan=validator_plan,
         exactness_rules=exactness_rules,
     )
+    artifact_defaults = _t2_artifact_defaults(
+        required_artifacts=required_artifacts,
+        artifact_specs=artifact_specs,
+    )
     aligned_validator_plan = _t2_align_validator_plan(
         validator_plan=validator_plan,
         acceptance_contract=acceptance_contract,
@@ -1955,6 +1997,7 @@ def _render_t2_prompt(
         "Machine contract:",
         _line("Must write", required_artifacts),
         _line("Artifact spec", artifact_specs),
+        _line("Artifact defaults", artifact_defaults),
         _line("Write requirements", write_requirements),
         _line("Done when", done_when),
         _line("Validate", aligned_validator_plan),

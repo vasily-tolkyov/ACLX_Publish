@@ -3,7 +3,10 @@
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 from functools import lru_cache
+import ntpath
 from pathlib import Path
+import posixpath
+import re
 from typing import Any
 
 import yaml
@@ -71,7 +74,7 @@ DEFAULT_HYBRID_MAP: dict[str, Any] = {
             "reasoning_effort": "low",
             "use_aclx": True,
             "include_transport_meta": False,
-            "include_profile_state": True,
+            "include_profile_state": False,
             "include_task_ref_state": False,
             "emit_machine_hint": False,
             "support_label": "Single handoff contract:",
@@ -210,6 +213,17 @@ class HybridRouteDecision:
 
 
 class ACLXHybridPromptBuilder:
+    _T1_PATH_CITATION_RE = re.compile(
+        r"^(?P<prefix>.+?)\s+"
+        r"(?P<verb>names|cites|references|mentions)\s+"
+        r"`?(?P<path>(?:[A-Za-z]:[\\/]|(?:\.\.?[\\/])|(?:[\w.-]+[\\/]))[^`;,\s]+(?:[\\/][^`;,\s]+)*)`?\s*$",
+        re.IGNORECASE,
+    )
+    _T1_TASK_PATH_RE = re.compile(
+        r"`?(?P<path>(?:[A-Za-z]:[\\/]|(?:\.\.?[\\/])|(?:[\w.-]+[\\/]))[^`;,\s]+(?:[\\/][^`;,\s]+)*)`?",
+        re.IGNORECASE,
+    )
+
     def __init__(self, adapter: ACLXAdapter | None = None, config_path: str | Path | None = None) -> None:
         self.adapter = adapter or ACLXAdapter()
         self.config_path = str(Path(config_path)) if config_path is not None else None
@@ -255,6 +269,7 @@ class ACLXHybridPromptBuilder:
                 task_ref="nl",
                 max_items=max_items,
                 tier_config=tier_config,
+                tier=tier,
             )
         prompt = self._compose_prompt(spec, contract=contract, bundle=bundle, tier_config=tier_config, tier=tier)
         return HybridPromptPayload(
@@ -341,6 +356,7 @@ class ACLXHybridPromptBuilder:
         snapshot_code: str | None = None,
         max_items: int,
         tier_config: dict[str, Any],
+        tier: str,
     ) -> str:
         state_parts: list[str] = []
         if tier_config.get("include_profile_state", True):
@@ -359,7 +375,7 @@ class ACLXHybridPromptBuilder:
         )
         evidence = self._transport_evidence(spec, contract, max_items, tier_config)
         risks = self._transport_risks(spec, contract, max_items, tier_config)
-        next_actions = self._transport_next_actions(contract, max_items, tier_config)
+        next_actions = self._transport_next_actions(contract, max_items, tier_config, tier)
         handoff = {
             "current_state": [";".join(state_parts)] if state_parts else [],
             "completed": self._transport_completed(spec, max_items, tier_config),
@@ -451,9 +467,18 @@ class ACLXHybridPromptBuilder:
             risks.append("iss=" + ",".join(issue_items))
         return risks[:keep]
 
-    def _transport_next_actions(self, contract: TaskContract, max_items: int, tier_config: dict[str, Any]) -> list[str]:
+    def _transport_next_actions(
+        self,
+        contract: TaskContract,
+        max_items: int,
+        tier_config: dict[str, Any],
+        tier: str,
+    ) -> list[str]:
         keep = int(tier_config.get("max_next_actions", max_items))
-        items = self._trim([self._slug(value) for value in contract.next_actions], keep)
+        values = contract.next_actions
+        if tier == "t1":
+            values = self._filter_t1_next_actions(values)
+        items = self._trim([self._slug(value) for value in values], keep)
         return ["nx=" + ",".join(items)] if items else []
 
     def _transport_completed(self, spec: HybridTaskSpec, max_items: int, tier_config: dict[str, Any]) -> list[str]:
@@ -532,19 +557,27 @@ class ACLXHybridPromptBuilder:
             return []
 
         lines = [str(tier_config.get("support_label", "") or "").strip() or "Single handoff contract:"]
-        lines.append("One delegated pass only. Keep setup minimal.")
-        lines.append("Skip router/config/help/package internals unless the task explicitly needs capability or package facts.")
+        lines.append(
+            "One reviewer pass only. Use it only if direct inspection still leaves a material ambiguity or missing fact for the required result, and that reviewer can inspect the same named inputs directly in the current workspace without extra setup or policy changes."
+        )
+        lines.append("Do not use the reviewer pass to reconfirm a conclusion already clear from direct inspection.")
+        lines.append("Do not read skill/router docs or probe commands to discover delegation.")
         must_write = self._hint_line("Must write", _display_outputs(spec, contract), max_items=2, max_chars=120)
         if must_write:
             lines.append(must_write)
         if tier_config.get("include_constraints", False):
-            done_when = self._hint_line("Done when", _contract_constraints(contract), max_items=3, max_chars=160)
+            done_when = self._hint_line(
+                "Done when",
+                self._filter_t1_done_when(spec.task, _display_outputs(spec, contract), _contract_constraints(contract)),
+                max_items=3,
+                max_chars=160,
+            )
             if done_when:
                 lines.append(done_when)
         if tier_config.get("include_next_hint", False):
             next_hint = self._hint_line(
                 "Next",
-                contract.next_actions,
+                self._filter_t1_next_actions(contract.next_actions),
                 max_items=max(1, int(tier_config.get("max_next_actions", 2))),
                 max_chars=96,
             )
@@ -554,8 +587,75 @@ class ACLXHybridPromptBuilder:
             avoid_hint = self._hint_line("Avoid", contract.scope_out + contract.stop_conditions, max_items=2, max_chars=96)
             if avoid_hint:
                 lines.append(avoid_hint)
-        lines.append("If delegation is blocked by policy or environment, continue locally from inspected evidence.")
+        lines.append(
+            "If the required conclusion is already clear from direct inspection, or no such reviewer is immediately readable, use named inputs as working evidence, create required outputs directly, and skip output-path probes, artifact rereads, extra line-number extraction, workspace listings, and code excerpts unless explicitly required or a fact remains ambiguous."
+        )
         return [line for line in lines if line]
+
+    @classmethod
+    def _filter_t1_next_actions(cls, values: list[str]) -> list[str]:
+        return [value for value in values if not cls._is_t1_delegation_boilerplate(value)]
+
+    @classmethod
+    def _filter_t1_constraints(cls, values: list[str]) -> list[str]:
+        return [value for value in values if not cls._is_t1_delegation_boilerplate(value)]
+
+    @classmethod
+    def _filter_t1_done_when(cls, task: str, outputs: list[str], values: list[str]) -> list[str]:
+        filtered = cls._filter_t1_constraints(values)
+        if not filtered:
+            return filtered
+        task_paths = cls._extract_t1_task_paths(task)
+        output_paths = {cls._normalize_t1_path_text(value) for value in outputs if cls._normalize_t1_path_text(value)}
+        deduped = [
+            value
+            for value in filtered
+            if not cls._is_redundant_t1_path_citation(value, task_paths=task_paths, output_paths=output_paths)
+        ]
+        return deduped or filtered
+
+    @staticmethod
+    def _is_t1_delegation_boilerplate(value: str) -> bool:
+        text = " ".join(str(value or "").strip().lower().split())
+        if text in {
+            "delegate once",
+            "delegate exactly once",
+            "delegate one pass",
+            "delegate exactly one pass",
+            "delegate a single pass",
+            "delegate single pass",
+            "delegate one handoff",
+            "delegate single handoff",
+            "one reviewer pass",
+            "exactly one reviewer pass",
+            "single reviewer pass",
+        }:
+            return True
+        if text.startswith("delegate ") and any(token in text for token in (" once", "single", "one pass", "one handoff")):
+            return True
+        return "reviewer pass" in text and any(token in text for token in ("once", "single", "exactly one", "one "))
+
+    @classmethod
+    def _is_redundant_t1_path_citation(cls, value: str, *, task_paths: set[str], output_paths: set[str]) -> bool:
+        match = cls._T1_PATH_CITATION_RE.match(str(value or "").strip())
+        if match is None:
+            return False
+        cited_path = cls._normalize_t1_path_text(match.group("path"))
+        if not cited_path or cited_path in output_paths:
+            return False
+        return cited_path in task_paths
+
+    @classmethod
+    def _extract_t1_task_paths(cls, task: str) -> set[str]:
+        return {
+            cls._normalize_t1_path_text(match.group("path"))
+            for match in cls._T1_TASK_PATH_RE.finditer(str(task or ""))
+            if cls._normalize_t1_path_text(match.group("path"))
+        }
+
+    @staticmethod
+    def _normalize_t1_path_text(value: str) -> str:
+        return str(value or "").strip().replace("\\", "/").replace("`", "").lower()
 
     def _t2_support_lines(self, spec: HybridTaskSpec, contract: TaskContract, tier_config: dict[str, Any]) -> list[str]:
         lines = [str(tier_config.get("support_label", "") or "").strip() or "Machine contract:"]
@@ -646,9 +746,12 @@ class ACLXHybridPromptBuilder:
         if not text:
             return ""
         if cwd:
-            base = Path(cwd)
+            base = str(cwd or "").strip().replace("\\", "/")
+            relative = _relative_path_text(text, base)
+            if relative is not None:
+                return relative
             try:
-                rel = Path(text).resolve().relative_to(base.resolve())
+                rel = Path(text).resolve().relative_to(Path(cwd).resolve())
             except Exception:
                 return text
             return rel.as_posix() or "."
@@ -669,6 +772,46 @@ class ACLXHybridPromptBuilder:
             text = text[:9] + "-" + text[-8:]
         atom = f"{prefix}.{text}" if text else prefix
         return atom[:24]
+
+
+def _relative_path_text(target: str, base: str) -> str | None:
+    relative = _relative_windows_path(target, base)
+    if relative is not None:
+        return relative
+    return _relative_posix_path(target, base)
+
+
+def _relative_windows_path(target: str, base: str) -> str | None:
+    if not (_looks_like_windows_absolute_path(target) and _looks_like_windows_absolute_path(base)):
+        return None
+    target_raw = target.replace("/", "\\")
+    base_raw = base.replace("/", "\\")
+    target_norm = ntpath.normcase(ntpath.normpath(target_raw))
+    base_norm = ntpath.normcase(ntpath.normpath(base_raw))
+    prefix = base_norm.rstrip("\\")
+    if target_norm == base_norm:
+        return "."
+    if not target_norm.startswith(prefix + "\\"):
+        return None
+    return ntpath.relpath(target_raw, base_raw).replace("\\", "/")
+
+
+def _relative_posix_path(target: str, base: str) -> str | None:
+    if not (target.startswith("/") and base.startswith("/")):
+        return None
+    target_norm = posixpath.normpath(target)
+    base_norm = posixpath.normpath(base)
+    prefix = base_norm.rstrip("/")
+    if target_norm == base_norm:
+        return "."
+    if not target_norm.startswith(prefix + "/"):
+        return None
+    return posixpath.relpath(target_norm, base_norm)
+
+
+def _looks_like_windows_absolute_path(value: str) -> bool:
+    text = str(value or "").strip()
+    return bool(re.match(r"^[A-Za-z]:[\\/]", text)) or text.startswith("\\\\")
 
 
 @lru_cache(maxsize=1024)
